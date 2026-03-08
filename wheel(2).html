@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#08030f">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Cosmic Whispers · Wheel of the Year</title>
+<style>
+/* ── COSMIC WHISPERS · shared.css ── */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&family=Raleway:wght@300;400;500;600&display=swap');
+
+:root {
+  --ink:#08030f; --deep:#0f0620; --void:#160b2a; --veil:#1e1038;
+  --mist:#271448; --dust:#8b6bb1; --silver:#c4a8e8; --moon:#e8daf5;
+  --star:#f5f0ff; --gold:#d4a843; --ember:#c4621a; --rose:#c4507a;
+  --teal:#3dbcb8; --sage:#7ab87a; --red:#e06060; --blue:#6080e8;
+  --r:16px; --glow:0 0 30px rgba(196,168,232,.15);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--moon);font-family:'Crimson Pro',Georgia,serif;
+  font-size:17px;min-height:100vh;overflow-x:hidden;padding-bottom:80px}
+
+/* STARFIELD */
+#starfield{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse at 25% 20%,#1a0f3a 0%,#08030f 65%)}
+.star{position:absolute;background:#fff;border-radius:50%;
+  animation:twinkle var(--dur,3s) var(--delay,0s) infinite ease-in-out}
+@keyframes twinkle{0%,100%{opacity:var(--lo,.2);transform:scale(1)}50%{opacity:var(--hi,.9);transform:scale(1.4)}}
+.nebula{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;
+  animation:drift 22s ease-in-out infinite alternate}
+.nb1{width:420px;height:320px;background:rgba(100,40,180,.1);top:-60px;right:-100px}
+.nb2{width:360px;height:360px;background:rgba(40,80,200,.07);bottom:80px;left:-80px;animation-delay:-11s}
+.nb3{width:280px;height:220px;background:rgba(180,50,120,.06);top:45%;right:15%;animation-delay:-5s}
+@keyframes drift{0%{transform:translate(0,0) rotate(0deg)}100%{transform:translate(25px,18px) rotate(12deg)}}
+
+/* LAYOUT */
+#app{position:relative;z-index:1;min-height:100vh;max-width:640px;margin:0 auto}
+
+/* HUD BAR */
+#hud{position:sticky;top:0;z-index:100;display:flex;align-items:center;
+  background:rgba(8,3,15,.88);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(196,168,232,.1);
+  padding:8px 4px;gap:2px;overflow-x:auto;scrollbar-width:none}
+#hud::-webkit-scrollbar{display:none}
+.hud-item{flex:1;min-width:52px;text-align:center;padding:4px 2px}
+.hud-label{font-family:'Raleway',sans-serif;font-size:9px;color:var(--dust);
+  letter-spacing:1px;text-transform:uppercase;margin-bottom:2px}
+.hud-val{font-family:'Raleway',sans-serif;font-size:11px;color:var(--moon);font-weight:500;white-space:nowrap}
+.sun-val{color:var(--gold)}
+.retro-val{color:var(--rose)}
+
+/* NAV */
+#nav{position:fixed;bottom:0;left:0;right:0;z-index:100;
+  background:rgba(8,3,15,.95);backdrop-filter:blur(20px);
+  border-top:1px solid rgba(196,168,232,.1);
+  display:flex;align-items:center;justify-content:space-around;
+  padding:6px 0 max(6px,env(safe-area-inset-bottom))}
+.nav-btn{background:none;border:none;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:5px 8px;border-radius:10px;color:var(--dust);
+  font-family:'Raleway',sans-serif;font-size:9px;letter-spacing:.5px;
+  min-width:42px;transition:color .2s;text-decoration:none}
+.nav-btn.active{color:var(--silver)}
+.nav-btn.active .ni{filter:drop-shadow(0 0 5px rgba(196,168,232,.5))}
+.ni{font-size:18px;transition:transform .2s;display:block}
+.nav-btn:active .ni{transform:scale(.85)}
+
+/* CARDS */
+.card{background:rgba(22,11,42,.72);border:1px solid rgba(196,168,232,.1);
+  border-radius:var(--r);padding:18px;margin-bottom:14px;
+  backdrop-filter:blur(10px);box-shadow:var(--glow)}
+.card-title{font-family:'Cinzel Decorative',serif;font-size:11px;letter-spacing:3px;
+  color:var(--dust);text-transform:uppercase;margin-bottom:14px;
+  display:flex;align-items:center;gap:8px}
+.card-title::after{content:'';flex:1;height:1px;
+  background:linear-gradient(to right,rgba(196,168,232,.2),transparent)}
+
+/* PAGE HEADER */
+.page-wrap{padding:16px}
+.page-title{font-family:'Cinzel Decorative',serif;font-size:20px;
+  color:var(--silver);text-align:center;margin-bottom:4px;
+  text-shadow:0 0 30px rgba(196,168,232,.4)}
+.page-sub{font-size:13px;color:var(--dust);text-align:center;
+  font-style:italic;margin-bottom:20px}
+
+/* BUTTONS */
+.btn{border:none;border-radius:12px;cursor:pointer;
+  font-family:'Raleway',sans-serif;letter-spacing:1.5px;
+  text-transform:uppercase;transition:all .2s;width:100%;padding:12px}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,rgba(100,50,180,.45),rgba(60,80,200,.35));
+  border:1px solid rgba(196,168,232,.25);color:var(--moon);font-size:13px}
+.btn-teal{background:rgba(61,188,184,.15);border:1px solid rgba(61,188,184,.3);
+  color:var(--teal);font-size:12px;margin-top:10px}
+.btn-gold{background:rgba(212,168,67,.15);border:1px solid rgba(212,168,67,.3);
+  color:var(--gold);font-size:12px;margin-top:10px}
+
+/* INPUTS */
+.field-label{font-family:'Raleway',sans-serif;font-size:11px;color:var(--dust);
+  letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;display:block}
+.field-input{width:100%;background:rgba(30,16,56,.8);
+  border:1px solid rgba(196,168,232,.15);border-radius:10px;
+  color:var(--moon);font-family:'Crimson Pro',serif;font-size:16px;
+  padding:10px 14px;outline:none;transition:border-color .2s}
+.field-input:focus{border-color:rgba(196,168,232,.4)}
+textarea.field-input{min-height:110px;resize:vertical}
+.field-group{margin-bottom:12px}
+
+/* TAGS */
+.tag{background:rgba(196,168,232,.1);border:1px solid rgba(196,168,232,.15);
+  border-radius:20px;padding:4px 12px;
+  font-family:'Raleway',sans-serif;font-size:12px;color:var(--silver);display:inline-block}
+.tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+
+/* TOGGLE */
+.toggle-row{display:flex;background:rgba(30,16,56,.7);
+  border:1px solid rgba(196,168,232,.1);border-radius:10px;
+  overflow:hidden;margin-bottom:16px}
+.toggle-btn{flex:1;background:none;border:none;cursor:pointer;
+  padding:9px 6px;font-family:'Raleway',sans-serif;font-size:11px;
+  color:var(--dust);transition:all .2s;letter-spacing:.5px}
+.toggle-btn.active{background:rgba(196,168,232,.14);color:var(--silver)}
+
+/* MODAL */
+#modal-overlay{display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(4,1,10,.88);backdrop-filter:blur(8px);
+  align-items:flex-end;justify-content:center}
+#modal-overlay.open{display:flex;animation:fadeIn .2s ease}
+#modal-box{background:var(--void);border:1px solid rgba(196,168,232,.15);
+  border-radius:24px 24px 0 0;padding:24px 20px max(24px,env(safe-area-inset-bottom));
+  width:100%;max-width:640px;max-height:88vh;overflow-y:auto;
+  animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal-close{float:right;background:rgba(196,168,232,.1);border:none;
+  color:var(--dust);font-size:18px;border-radius:50%;
+  width:30px;height:30px;cursor:pointer;line-height:30px;text-align:center}
+.modal-title{font-family:'Cinzel Decorative',serif;font-size:16px;color:var(--silver);margin-bottom:3px}
+.modal-sub{font-size:13px;color:var(--dust);margin-bottom:18px}
+.modal-section{margin-bottom:14px}
+.modal-section h4{font-family:'Raleway',sans-serif;font-size:10px;
+  letter-spacing:2px;color:var(--dust);text-transform:uppercase;margin-bottom:5px}
+
+/* RESULT ROWS */
+.result-row{display:flex;justify-content:space-between;align-items:center;
+  padding:8px 0;border-bottom:1px solid rgba(196,168,232,.06)}
+.result-label{color:var(--dust);font-size:14px}
+.result-val{color:var(--moon);font-size:14px;text-align:right;max-width:60%}
+
+/* DIVIDER */
+.divider{height:1px;background:linear-gradient(to right,transparent,rgba(196,168,232,.15),transparent);margin:14px 0}
+
+/* TOAST */
+#toast{position:fixed;bottom:95px;left:50%;transform:translateX(-50%) translateY(16px);
+  background:rgba(61,188,184,.92);color:#fff;border-radius:20px;
+  padding:10px 24px;font-family:'Raleway',sans-serif;font-size:13px;
+  z-index:300;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:4px;border-radius:20px;
+  padding:3px 10px;font-family:'Raleway',sans-serif;font-size:10px;letter-spacing:.5px}
+.badge-retro{background:rgba(196,100,80,.15);border:1px solid rgba(196,100,80,.3);color:var(--ember)}
+.badge-teal{background:rgba(61,188,184,.12);border:1px solid rgba(61,188,184,.25);color:var(--teal)}
+.badge-gold{background:rgba(212,168,67,.12);border:1px solid rgba(212,168,67,.25);color:var(--gold)}
+.badge-green{background:rgba(122,184,122,.12);border:1px solid rgba(122,184,122,.25);color:var(--sage)}
+
+/* LOADING */
+.loading{color:var(--dust);font-style:italic;text-align:center;padding:24px;font-size:15px}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(196,168,232,.2);border-radius:2px}
+
+</style>
+<script src="https://unpkg.com/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
+</head>
+<body data-page="wheel">
+<div id="starfield"></div><div class="nebula nb1"></div><div class="nebula nb2"></div>
+<div id="app">
+  <div id="hud"></div>
+  <div class="page-wrap">
+    <div class="page-title">☸ Wheel of the Year</div>
+    <div class="page-sub">The eight sacred sabbats of the witch's calendar</div>
+
+    <div class="toggle-row">
+      <button class="toggle-btn active" onclick="setHemisphere('north',this)">🌍 Northern Hemisphere</button>
+      <button class="toggle-btn" onclick="setHemisphere('south',this)">🌏 Southern Hemisphere</button>
+    </div>
+
+    <div id="sabbat-list"></div>
+  </div>
+</div>
+<div id="nav-mount"></div>
+
+<style>
+.sabbat-card{border-radius:14px;padding:16px;margin-bottom:10px;cursor:pointer;transition:transform .2s;position:relative;border:1px solid rgba(255,255,255,.08)}
+.sabbat-card:active{transform:scale(.98)}
+.sabbat-next-badge{position:absolute;top:12px;right:12px;background:rgba(212,168,67,.25);border:1px solid rgba(212,168,67,.4);color:var(--gold);font-family:'Raleway',sans-serif;font-size:10px;padding:3px 10px;border-radius:20px;letter-spacing:1px}
+.sabbat-top{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.sabbat-emoji{font-size:36px}
+.sabbat-name{font-family:'Cinzel Decorative',serif;font-size:16px;color:#fff}
+.sabbat-date{font-size:13px;opacity:.8;margin-top:2px}
+.sabbat-theme{font-size:13px;opacity:.85;line-height:1.5}
+.sabbat-countdown{font-family:'Raleway',sans-serif;font-size:12px;margin-top:8px;font-weight:600}
+</style>
+
+<script>
+// ── COSMIC WHISPERS · shared.js ──
+
+const SUPA_URL = 'https://jzitxcubechrxochtztm.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6aXR4Y3ViZWNocnhvY2h0enRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4OTIwMjAsImV4cCI6MjA4ODQ2ODAyMH0.EiQrFfb-8AF9Jjc1AfI4txYxHf-XzazHF-XY7N4uLEk';
+
+async function dbInsert(table, row) {
+  try {
+    const r = await fetch(`${SUPA_URL}/rest/v1/${table}`, {
+      method:'POST', headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'Prefer':'return=minimal'},
+      body: JSON.stringify(row)
+    });
+    return r.ok;
+  } catch(e) { return false; }
+}
+async function dbSelect(table, limit=50) {
+  try {
+    const r = await fetch(`${SUPA_URL}/rest/v1/${table}?order=created_at.desc&limit=${limit}`, {
+      headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`}
+    });
+    return r.ok ? await r.json() : [];
+  } catch(e) { return []; }
+}
+
+function getTesterName() {
+  let n = localStorage.getItem('cw_tester');
+  if (!n) { n = prompt('Welcome to Cosmic Whispers Beta!\nEnter your name:') || 'Seeker'; localStorage.setItem('cw_tester', n); }
+  return n;
+}
+
+function initStarfield() {
+  const sf = document.getElementById('starfield'); if (!sf) return;
+  for (let i=0;i<160;i++) {
+    const s=document.createElement('div'); s.className='star';
+    const sz=Math.random()*2.5+0.4;
+    s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--lo:${(Math.random()*.3+.05).toFixed(2)};--hi:${(Math.random()*.6+.4).toFixed(2)};--dur:${(Math.random()*4+2).toFixed(1)}s;--delay:-${(Math.random()*6).toFixed(1)}s`;
+    sf.appendChild(s);
+  }
+}
+
+const SIGNS=[{name:'Aries',glyph:'♈'},{name:'Taurus',glyph:'♉'},{name:'Gemini',glyph:'♊'},{name:'Cancer',glyph:'♋'},{name:'Leo',glyph:'♌'},{name:'Virgo',glyph:'♍'},{name:'Libra',glyph:'♎'},{name:'Scorpio',glyph:'♏'},{name:'Sagittarius',glyph:'♐'},{name:'Capricorn',glyph:'♑'},{name:'Aquarius',glyph:'♒'},{name:'Pisces',glyph:'♓'}];
+
+function lonToSign(lon){const n=((lon%360)+360)%360,i=Math.floor(n/30);return{...SIGNS[i],deg:(n-i*30).toFixed(1),idx:i};}
+
+// Safe astronomy wrappers - never crash, always return something
+function getSunLon(d){
+  try{ if(typeof Astronomy==='undefined') return estimateSunLon(d); return Astronomy.SunPosition(d).elon; }
+  catch(e){ return estimateSunLon(d); }
+}
+function estimateSunLon(d) {
+  // Rough Sun longitude estimate based on day of year
+  const start = new Date(d.getFullYear(), 0, 0);
+  const diff = d - start;
+  const dayOfYear = Math.floor(diff / 86400000);
+  return ((dayOfYear - 80) / 365.25) * 360;
+}
+function getMoonLon(d){
+  try{
+    if(typeof Astronomy==='undefined') return estimateMoonLon(d);
+    const eq=Astronomy.Equator('Moon',d,null,false,true),ec=Astronomy.Ecliptic(eq.vec);
+    return((ec.elon%360)+360)%360;
+  }catch(e){ return estimateMoonLon(d); }
+}
+function estimateMoonLon(d) {
+  // Rough Moon longitude estimate
+  const knownNew = new Date('2024-01-11').getTime();
+  const synodicMs = 29.53059 * 86400000;
+  const elapsed = d.getTime() - knownNew;
+  const phase = ((elapsed % synodicMs) + synodicMs) % synodicMs;
+  return (phase / synodicMs) * 360;
+}
+function getPlanetLon(body,d){
+  try{
+    if(typeof Astronomy==='undefined') return null;
+    const eq=Astronomy.Equator(body,d,null,false,true),ec=Astronomy.Ecliptic(eq.vec);
+    return((ec.elon%360)+360)%360;
+  }catch(e){ return null; }
+}
+function isRetro(body,date){
+  if(body==='Sun'||body==='Moon')return false;
+  try{
+    if(typeof Astronomy==='undefined') return false;
+    const l1=getPlanetLon(body,new Date(date-86400000)),l2=getPlanetLon(body,new Date(date+86400000));
+    if(l1===null||l2===null)return false;
+    let d=l2-l1;if(d>180)d-=360;if(d<-180)d+=360;return d<0;
+  }catch(e){return false;}
+}
+function getMoonPhase(d){
+  try{
+    if(typeof Astronomy==='undefined') return estimateMoonPhase(d);
+    const a=Astronomy.MoonPhase(d),il=Math.round((1-Math.cos(a*Math.PI/180))/2*100);
+    const p=[[22.5,'New Moon','🌑'],[67.5,'Waxing Crescent','🌒'],[112.5,'First Quarter','🌓'],[157.5,'Waxing Gibbous','🌔'],[202.5,'Full Moon','🌕'],[247.5,'Waning Gibbous','🌖'],[292.5,'Last Quarter','🌗'],[337.5,'Waning Crescent','🌘']];
+    for(const[t,n,i]of p)if(a<t)return{name:n,icon:i,illum:il,angle:a};
+    return{name:'New Moon',icon:'🌑',illum:il,angle:a};
+  }catch(e){ return estimateMoonPhase(d); }
+}
+function estimateMoonPhase(d) {
+  const lon = estimateMoonLon(d);
+  const sunLon = estimateSunLon(d);
+  const angle = ((lon - sunLon) + 360) % 360;
+  const il = Math.round((1-Math.cos(angle*Math.PI/180))/2*100);
+  const p=[[22.5,'New Moon','🌑'],[67.5,'Waxing Crescent','🌒'],[112.5,'First Quarter','🌓'],[157.5,'Waxing Gibbous','🌔'],[202.5,'Full Moon','🌕'],[247.5,'Waning Gibbous','🌖'],[292.5,'Last Quarter','🌗'],[337.5,'Waning Crescent','🌘']];
+  for(const[t,n,i]of p)if(angle<t)return{name:n,icon:i,illum:il,angle};
+  return{name:'New Moon',icon:'🌑',illum:il,angle};
+}
+
+// Sun/Moon rise/set with fallback
+function getSunTimes(date, lat, lon) {
+  try {
+    if(typeof Astronomy==='undefined'||!lat||!lon) return {rise:'6:30 AM',set:'6:30 PM',daylight:'12.0h'};
+    const obs=new Astronomy.Observer(lat,lon,0);
+    const fmt=d=>d?new Date(d.date).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'—';
+    const sr=Astronomy.SearchRiseSet('Sun',obs,+1,date,1);
+    const ss=Astronomy.SearchRiseSet('Sun',obs,-1,date,1);
+    const hrs=sr&&ss?((new Date(ss.date)-new Date(sr.date))/3600000).toFixed(1)+'h':'12h';
+    return{rise:fmt(sr),set:fmt(ss),daylight:hrs};
+  }catch(e){return{rise:'6:30 AM',set:'6:30 PM',daylight:'12.0h'};}
+}
+function getMoonTimes(date, lat, lon) {
+  try {
+    if(typeof Astronomy==='undefined'||!lat||!lon) return {rise:'—',set:'—'};
+    const obs=new Astronomy.Observer(lat,lon,0);
+    const fmt=d=>d?new Date(d.date).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'—';
+    return{rise:fmt(Astronomy.SearchRiseSet('Moon',obs,+1,date,1)),set:fmt(Astronomy.SearchRiseSet('Moon',obs,-1,date,1))};
+  }catch(e){return{rise:'—',set:'—'};}
+}
+
+const PLANETS=[
+  {name:'Sun',glyph:'☉',body:'Sun',color:'#f5c842',emoji:'🌞',au:0},
+  {name:'Moon',glyph:'☽',body:'Moon',color:'#e8daf5',emoji:'🌙',au:.00257},
+  {name:'Mercury',glyph:'☿',body:'Mercury',color:'#a8c4e0',emoji:'⚡',au:.387},
+  {name:'Venus',glyph:'♀',body:'Venus',color:'#f5c084',emoji:'💛',au:.723},
+  {name:'Mars',glyph:'♂',body:'Mars',color:'#e06060',emoji:'🔴',au:1.524},
+  {name:'Jupiter',glyph:'♃',body:'Jupiter',color:'#f0a840',emoji:'🟠',au:5.203},
+  {name:'Saturn',glyph:'♄',body:'Saturn',color:'#c8b870',emoji:'🪐',au:9.537},
+  {name:'Uranus',glyph:'⛢',body:'Uranus',color:'#80e0e0',emoji:'🔵',au:19.19},
+  {name:'Neptune',glyph:'♆',body:'Neptune',color:'#6080e8',emoji:'🔮',au:30.07},
+  {name:'Pluto',glyph:'♇',body:'Pluto',color:'#8080a0',emoji:'⚫',au:39.48},
+];
+
+function computeSigns(date){
+  const s={};
+  for(const p of PLANETS){
+    let lon = p.body==='Sun' ? getSunLon(date)
+            : p.body==='Moon' ? getMoonLon(date)
+            : getPlanetLon(p.body,date);
+    // Use estimate for outer planets if Astronomy not ready
+    if(lon===null){
+      lon = estimateSunLon(date) + (p.au * 30); // rough placeholder
+    }
+    s[p.name]=lonToSign(lon);
+    s[p.name].retro=isRetro(p.body,date.getTime());
+  }
+  return s;
+}
+
+const DAY_RULERS=['Sun','Moon','Mars','Mercury','Jupiter','Venus','Saturn'];
+const DAY_GLYPHS={Sun:'☉',Moon:'☽',Mars:'♂',Mercury:'☿',Jupiter:'♃',Venus:'♀',Saturn:'♄'};
+const DAY_NAMES=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+const CACHE_KEY='cw_v5';
+function loadCache(){try{return JSON.parse(localStorage.getItem(CACHE_KEY));}catch(e){return null;}}
+function saveCache(d){try{localStorage.setItem(CACHE_KEY,JSON.stringify({ts:Date.now(),d}));}catch(e){}}
+function cacheStale(c){
+  if(!c||!c.d)return true;
+  if(Date.now()-c.ts>4*3600000)return true;
+  return false;
+}
+
+function renderHUD(signs,moon){
+  const el=document.getElementById('hud');if(!el)return;
+  const sun=signs?.Sun,ruler=DAY_RULERS[new Date().getDay()],
+        retros=signs?Object.values(signs).filter(s=>s.retro).length:0,now=new Date();
+  el.innerHTML=`
+    <div class="hud-item"><div class="hud-label">SUN</div><div class="hud-val sun-val">${sun?sun.glyph+' '+sun.name:'♈ Aries'}</div></div>
+    <div class="hud-item"><div class="hud-label">MOON</div><div class="hud-val">${moon?moon.icon+' '+moon.illum+'%':'🌙'}</div></div>
+    <div class="hud-item"><div class="hud-label">RULER</div><div class="hud-val">${DAY_GLYPHS[ruler]} ${ruler}</div></div>
+    <div class="hud-item"><div class="hud-label">℞</div><div class="hud-val retro-val">${retros>0?'● '+retros:'● 0'}</div></div>
+    <div class="hud-item"><div class="hud-label">TODAY</div><div class="hud-val">${now.toLocaleDateString([],{month:'short',day:'numeric'})}</div></div>
+    <div class="hud-item"><div class="hud-label">UPDATED</div><div class="hud-val">${now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div></div>`;
+}
+
+function showToast(msg){
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t);}
+  t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);
+}
+function copyText(text){
+  navigator.clipboard.writeText(text).then(()=>showToast('✦ Copied!')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showToast('✦ Copied!');
+  });
+}
+
+const NAV_ITEMS=[
+  {page:'index',icon:'🏠',label:'Home',href:'index.html'},
+  {page:'horoscope',icon:'♈',label:'Signs',href:'horoscope.html'},
+  {page:'retro',icon:'⚡',label:'Retro',href:'retro.html'},
+  {page:'shadows',icon:'📖',label:'Shadows',href:'shadows.html'},
+  {page:'journal',icon:'📝',label:'Journal',href:'journal.html'},
+  {page:'wheel',icon:'☸',label:'Wheel',href:'wheel.html'},
+  {page:'planets',icon:'🪐',label:'Planets',href:'planets.html'},
+  {page:'tools',icon:'🔭',label:'Tools',href:'tools.html'},
+];
+function injectNav(active){
+  const el=document.getElementById('nav-mount');if(!el)return;
+  el.innerHTML=`<nav id="nav">${NAV_ITEMS.map(n=>`<a class="nav-btn${n.page===active?' active':''}" href="${n.href}"><span class="ni">${n.icon}</span>${n.label}</a>`).join('')}</nav>`;
+}
+function openModal(html){
+  let ov=document.getElementById('modal-overlay');
+  if(!ov){ov=document.createElement('div');ov.id='modal-overlay';ov.innerHTML='<div id="modal-box"></div>';document.body.appendChild(ov);
+    ov.addEventListener('click',e=>{if(e.target===ov)closeModal();});}
+  document.getElementById('modal-box').innerHTML=html;
+  ov.classList.add('open');
+}
+function closeModal(){const ov=document.getElementById('modal-overlay');if(ov)ov.classList.remove('open');}
+
+// Wait for Astronomy library to load before computing
+function waitForAstronomy(cb, tries=0) {
+  if(typeof Astronomy !== 'undefined') { cb(); return; }
+  if(tries > 20) { cb(); return; } // give up after 2s, use estimates
+  setTimeout(() => waitForAstronomy(cb, tries+1), 100);
+}
+
+window.addEventListener('load',()=>{
+  initStarfield();
+  injectNav(document.body.dataset.page);
+});
+
+</script>
+<script>
+const SABBATS_NORTH = [
+  {name:'Yule',emoji:'🌑',color:'#1a2a4a',gradient:'linear-gradient(135deg,#0a1428,#1a2a4a)',
+   date:'December 21',mo:11,d:21,season:'Winter Solstice',
+   theme:'The darkest night becomes the turning point — the Sun is reborn. A time of stillness, inner reflection, and lighting candles against the dark.',
+   magic:['Sun magic','Rebirth spells','Oak & Holly rituals','Solstice fire','Yule log'],
+   herbs:['Holly','Mistletoe','Pine','Frankincense','Cinnamon'],
+   colors:['Red','Green','Gold','White','Silver'],
+   crystals:['Ruby','Bloodstone','Clear Quartz'],
+   deities:['Oak King','Holly King','Odin','Freya'],
+   activities:['Burn a Yule log','Make solar wheel ornaments','Wassailing','Gift giving','Stay up for sunrise'],
+   element:'Fire (inner light)'},
+  {name:'Imbolc',emoji:'🕯️',color:'#2a1a3a',gradient:'linear-gradient(135deg,#1a0a2a,#2a1a4a)',
+   date:'February 2',mo:1,d:2,season:'Early Spring',
+   theme:'The first stirrings of spring beneath the snow. Bridget\'s fire is rekindled. Seeds of intention are planted. Purification and new beginnings.',
+   magic:['Candle magic','Purification rituals','Seed blessing','Brigid crosses','Healing magic'],
+   herbs:['Snowdrop','Angelica','Basil','Rosemary','Celandine'],
+   colors:['White','Silver','Pink','Yellow'],
+   crystals:['Amethyst','Garnet','Bloodstone'],
+   deities:['Brigid','Bride','Candlemas saints'],
+   activities:['Light all candles in your home','Make Brigid crosses','Bless seeds for spring','Cleanse your altar','Spring cleaning ritual'],
+   element:'Fire (purification)'},
+  {name:'Ostara',emoji:'🌸',color:'#1a3a1a',gradient:'linear-gradient(135deg,#0a2010,#1a3a1a)',
+   date:'March 20–21',mo:2,d:20,season:'Spring Equinox',
+   theme:'Perfect balance of day and night. The Goddess is the Maiden, the God is the Youth. Fertility, growth, renewal, and the joy of new life emerging.',
+   magic:['Fertility magic','Egg magic','Balance spells','Growth & renewal','Love magic'],
+   herbs:['Violet','Jasmine','Rose','Daffodil','Clover'],
+   colors:['Pale green','Yellow','Pink','Lavender'],
+   crystals:['Rose Quartz','Moonstone','Aquamarine'],
+   deities:['Eostre/Ostara','Persephone','Demeter','Green Man'],
+   activities:['Decorate eggs','Plant a magical garden','Create a spring altar','Egg divination','Seed planting ritual'],
+   element:'Air & Earth'},
+  {name:'Beltane',emoji:'🔥',color:'#3a1a0a',gradient:'linear-gradient(135deg,#2a0a0a,#3a1a0a)',
+   date:'May 1',mo:4,d:1,season:'Early Summer',
+   theme:'The great marriage of the God and Goddess. Fire, passion, fertility at its peak. Dancing the Maypole, leaping bonfires, celebrating the abundant life force.',
+   magic:['Love & passion magic','Fire magic','Fertility spells','Handfasting','Abundance magic'],
+   herbs:['Hawthorn','Elderflower','Meadowsweet','Woodruff','Rowan'],
+   colors:['Red','White','Green','Gold','Pink'],
+   crystals:['Carnelian','Garnet','Rose Quartz'],
+   deities:['Cernunnos','The Green Man','Flora','Aphrodite'],
+   activities:['Dance the Maypole','Jump the Balefire','Gather May dew at dawn','Make flower crowns','Handfasting ceremony'],
+   element:'Fire & Earth'},
+  {name:'Litha',emoji:'☀️',color:'#3a2a0a',gradient:'linear-gradient(135deg,#2a1a00,#3a2a10)',
+   date:'June 21',mo:5,d:21,season:'Summer Solstice',
+   theme:'The longest day. The Sun is at full power. Herbs are at their magical peak. But the Wheel turns — after this peak, the light slowly diminishes. Celebrate and preserve the fire.',
+   magic:['Sun magic','Abundance','Empowerment','Herb harvesting','Protection'],
+   herbs:['St John\'s Wort','Lavender','Chamomile','Vervain','Mugwort'],
+   colors:['Gold','Yellow','Orange','Green'],
+   crystals:['Sunstone','Citrine','Tiger Eye'],
+   deities:['Sol','Apollo','Lugh','Oak King at his peak'],
+   activities:['Sunrise ritual','Gather St. John\'s Wort','Bonfire magic','Sun water & solar oil','Herb preservation'],
+   element:'Fire (solar)'},
+  {name:'Lammas',emoji:'🌾',color:'#2a2a0a',gradient:'linear-gradient(135deg,#1a1a00,#2a2a10)',
+   date:'August 1',mo:7,d:1,season:'Late Summer',
+   theme:'The first harvest. Grain magic and bread blessings. Gratitude for abundance. The Oak King sacrifices himself so the harvest may feed the people. Lughnasadh.',
+   magic:['Harvest magic','Gratitude rituals','Grain & bread spells','Abundance','First fruits offerings'],
+   herbs:['Corn','Wheat','Sunflower','Calendula','Goldenrod'],
+   colors:['Gold','Orange','Yellow','Brown'],
+   crystals:['Citrine','Amber','Peridot'],
+   deities:['Lugh','Demeter','Ceres','John Barleycorn'],
+   activities:['Bake sacred bread','Corn dolly making','Gratitude ritual','First fruits offering','Skills & crafts honoring'],
+   element:'Earth & Fire'},
+  {name:'Mabon',emoji:'🍂',color:'#2a1a0a',gradient:'linear-gradient(135deg,#1a0a00,#2a1a10)',
+   date:'September 22–23',mo:8,d:22,season:'Autumn Equinox',
+   theme:'Second harvest and perfect balance. Night equals day. The God prepares to journey to the underworld. Give thanks for all you have harvested — inwardly and outwardly.',
+   magic:['Harvest magic','Balance spells','Gratitude','Ancestor work begins','Releasing what is done'],
+   herbs:['Marigold','Sage','Hazel','Thistle','Apple'],
+   colors:['Orange','Red','Brown','Gold','Burgundy'],
+   crystals:['Carnelian','Amber','Smoky Quartz'],
+   deities:['Persephone descending','Demeter grieving','Dionysus','Mabon ap Modron'],
+   activities:['Apple magic','Make apple wine or cider','Gratitude altar','Balance meditation','Leaf reading (tasseomancy)'],
+   element:'Earth & Air'},
+  {name:'Samhain',emoji:'🕸️',color:'#1a0a2a',gradient:'linear-gradient(135deg,#0a0014,#1a0a2a)',
+   date:'October 31',mo:9,d:31,season:'Late Autumn',
+   theme:'The veil between worlds is thinnest. The great witch\'s new year. Ancestors walk among us. Shadow work, divination, and releasing the old year are most powerful now.',
+   magic:['Ancestor magic','Divination','Shadow work','Spirit communication','Banishing','Necromancy'],
+   herbs:['Mugwort','Wormwood','Mandrake','Nightshade (caution!)','Rosemary for remembrance'],
+   colors:['Black','Orange','Purple','Deep red'],
+   crystals:['Obsidian','Black Tourmaline','Labradorite','Amethyst'],
+   deities:['Hecate','The Morrigan','Osiris','The Crone','Samhain God'],
+   activities:['Dumb supper for ancestors','Scrying & divination','Tarot','Build ancestor altar','Shadow work journaling','Bonfire leaping'],
+   element:'Water & Spirit'},
+];
+
+const SABBATS_SOUTH = [
+  {...SABBATS_NORTH[4],date:'December 21',mo:11,d:21,note:'Southern: Summer Solstice at this time'},
+  {...SABBATS_NORTH[5],date:'February 2',mo:1,d:2,note:'Southern: First harvest season begins'},
+  {...SABBATS_NORTH[6],date:'March 20',mo:2,d:20,note:'Southern: Autumn Equinox'},
+  {...SABBATS_NORTH[7],date:'May 1',mo:4,d:1,note:'Southern: Samhain season'},
+  {...SABBATS_NORTH[0],date:'June 21',mo:5,d:21,note:'Southern: Yule / Winter Solstice'},
+  {...SABBATS_NORTH[1],date:'August 1',mo:7,d:1,note:'Southern: Imbolc / Bride\'s Day'},
+  {...SABBATS_NORTH[2],date:'September 22',mo:8,d:22,note:'Southern: Ostara / Spring Equinox'},
+  {...SABBATS_NORTH[3],date:'November 1',mo:10,d:1,note:'Southern: Beltane season'},
+];
+
+let hemisphere = 'north';
+
+function setHemisphere(h, btn) {
+  hemisphere = h;
+  document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSabbats();
+}
+
+function renderSabbats() {
+  const list = hemisphere === 'north' ? SABBATS_NORTH : SABBATS_SOUTH;
+  const now = new Date();
+  const yr = now.getFullYear();
+
+  // find next sabbat
+  let nextIdx = -1, minDiff = Infinity;
+  list.forEach((s, i) => {
+    let dt = new Date(yr, s.mo, s.d);
+    if (dt < now) dt = new Date(yr + 1, s.mo, s.d);
+    const diff = dt - now;
+    if (diff > 0 && diff < minDiff) { minDiff = diff; nextIdx = i; }
+  });
+
+  document.getElementById('sabbat-list').innerHTML = list.map((s, i) => {
+    let dt = new Date(yr, s.mo, s.d);
+    if (dt < now) dt = new Date(yr + 1, s.mo, s.d);
+    const days = Math.ceil((dt - now) / 86400000);
+    const isPast = dt < now;
+    const isNext = i === nextIdx;
+    return `<div class="sabbat-card" style="background:${s.gradient};opacity:${isPast ? '.75' : '1'}" onclick="showSabbat(${i})">
+      ${isNext ? '<div class="sabbat-next-badge">✦ NEXT</div>' : ''}
+      <div class="sabbat-top">
+        <div class="sabbat-emoji">${s.emoji}</div>
+        <div>
+          <div class="sabbat-name">${s.name}</div>
+          <div class="sabbat-date">📅 ${s.date} · ${s.season}</div>
+        </div>
+      </div>
+      <div class="sabbat-theme">${s.theme.substring(0, 120)}…</div>
+      <div class="sabbat-countdown" style="color:${isNext ? 'var(--gold)' : 'rgba(255,255,255,.5)'}">
+        ${isNext ? '⭐ ' : ''}${days} days away
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function showSabbat(idx) {
+  const list = hemisphere === 'north' ? SABBATS_NORTH : SABBATS_SOUTH;
+  const s = list[idx];
+  const now = new Date();
+  let dt = new Date(now.getFullYear(), s.mo, s.d);
+  if (dt < now) dt = new Date(now.getFullYear() + 1, s.mo, s.d);
+  const days = Math.ceil((dt - now) / 86400000);
+
+  openModal(`
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div style="font-size:40px;margin-bottom:6px">${s.emoji}</div>
+    <div class="modal-title">${s.name}</div>
+    <div class="modal-sub">${s.date} · ${s.season} · ${days} days away</div>
+    <div style="font-size:15px;color:var(--moon);line-height:1.7;margin-bottom:14px">${s.theme}</div>
+    ${s.note ? `<div style="font-size:12px;color:var(--teal);margin-bottom:10px">🌏 ${s.note}</div>` : ''}
+    <div class="modal-section"><h4>✨ Magic & Spellwork</h4><div class="tag-row">${(s.magic||[]).map(m=>`<span class="tag">${m}</span>`).join('')}</div></div>
+    <div class="modal-section"><h4>🌿 Sacred Herbs</h4><div class="tag-row">${(s.herbs||[]).map(h=>`<span class="tag">🌿 ${h}</span>`).join('')}</div></div>
+    <div class="modal-section"><h4>💎 Crystals</h4><div class="tag-row">${(s.crystals||[]).map(c=>`<span class="tag">💎 ${c}</span>`).join('')}</div></div>
+    <div class="modal-section"><h4>🎨 Colors</h4><div class="tag-row">${(s.colors||[]).map(c=>`<span class="tag">${c}</span>`).join('')}</div></div>
+    <div class="modal-section"><h4>🌙 Deities</h4><div class="tag-row">${(s.deities||[]).map(d=>`<span class="tag">⭐ ${d}</span>`).join('')}</div></div>
+    <div class="modal-section"><h4>🕯️ Traditional Activities</h4>${(s.activities||[]).map(a=>`<div style="padding:5px 0;border-bottom:1px solid rgba(196,168,232,.06);font-size:14px;color:var(--moon)">• ${a}</div>`).join('')}</div>
+    <div class="modal-section"><h4>🜂 Element</h4><p>${s.element}</p></div>
+    <button class="btn btn-teal" onclick="copySabbat(${idx})" style="margin-top:14px">📋 Copy to Book of Shadows</button>
+  `);
+}
+
+function copySabbat(idx) {
+  const list = hemisphere === 'north' ? SABBATS_NORTH : SABBATS_SOUTH;
+  const s = list[idx];
+  const text = `✦ ${s.emoji} ${s.name} — ${s.date}\n${s.season}\n\n${s.theme}\n\nMagic: ${(s.magic||[]).join(', ')}\nHerbs: ${(s.herbs||[]).join(', ')}\nCrystals: ${(s.crystals||[]).join(', ')}\nColors: ${(s.colors||[]).join(', ')}\nDeities: ${(s.deities||[]).join(', ')}\nActivities: ${(s.activities||[]).join(', ')}\nElement: ${s.element}\n\n— Cosmic Whispers`;
+  copyText(text);
+}
+
+function init() {
+  const cache = loadCache(); let signs, moon;
+  if (!cacheStale(cache)) { signs = cache.d.signs; moon = cache.d.moon; }
+  else { const now = new Date(); signs = computeSigns(now); moon = getMoonPhase(now); saveCache({signs,moon}); }
+  renderHUD(signs, moon);
+  renderSabbats();
+}
+function waitForAstronomy(cb,tries=0){if(typeof Astronomy!=="undefined"){cb();return;}if(tries>20){cb();return;}setTimeout(()=>waitForAstronomy(cb,tries+1),500);}
+waitForAstronomy(()=>init());
+</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");</script>
+</body>
+</html>

@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#08030f">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Cosmic Whispers · Tools</title>
+<style>
+/* ── COSMIC WHISPERS · shared.css ── */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&family=Raleway:wght@300;400;500;600&display=swap');
+
+:root {
+  --ink:#08030f; --deep:#0f0620; --void:#160b2a; --veil:#1e1038;
+  --mist:#271448; --dust:#8b6bb1; --silver:#c4a8e8; --moon:#e8daf5;
+  --star:#f5f0ff; --gold:#d4a843; --ember:#c4621a; --rose:#c4507a;
+  --teal:#3dbcb8; --sage:#7ab87a; --red:#e06060; --blue:#6080e8;
+  --r:16px; --glow:0 0 30px rgba(196,168,232,.15);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--moon);font-family:'Crimson Pro',Georgia,serif;
+  font-size:17px;min-height:100vh;overflow-x:hidden;padding-bottom:80px}
+
+/* STARFIELD */
+#starfield{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse at 25% 20%,#1a0f3a 0%,#08030f 65%)}
+.star{position:absolute;background:#fff;border-radius:50%;
+  animation:twinkle var(--dur,3s) var(--delay,0s) infinite ease-in-out}
+@keyframes twinkle{0%,100%{opacity:var(--lo,.2);transform:scale(1)}50%{opacity:var(--hi,.9);transform:scale(1.4)}}
+.nebula{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;
+  animation:drift 22s ease-in-out infinite alternate}
+.nb1{width:420px;height:320px;background:rgba(100,40,180,.1);top:-60px;right:-100px}
+.nb2{width:360px;height:360px;background:rgba(40,80,200,.07);bottom:80px;left:-80px;animation-delay:-11s}
+.nb3{width:280px;height:220px;background:rgba(180,50,120,.06);top:45%;right:15%;animation-delay:-5s}
+@keyframes drift{0%{transform:translate(0,0) rotate(0deg)}100%{transform:translate(25px,18px) rotate(12deg)}}
+
+/* LAYOUT */
+#app{position:relative;z-index:1;min-height:100vh;max-width:640px;margin:0 auto}
+
+/* HUD BAR */
+#hud{position:sticky;top:0;z-index:100;display:flex;align-items:center;
+  background:rgba(8,3,15,.88);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(196,168,232,.1);
+  padding:8px 4px;gap:2px;overflow-x:auto;scrollbar-width:none}
+#hud::-webkit-scrollbar{display:none}
+.hud-item{flex:1;min-width:52px;text-align:center;padding:4px 2px}
+.hud-label{font-family:'Raleway',sans-serif;font-size:9px;color:var(--dust);
+  letter-spacing:1px;text-transform:uppercase;margin-bottom:2px}
+.hud-val{font-family:'Raleway',sans-serif;font-size:11px;color:var(--moon);font-weight:500;white-space:nowrap}
+.sun-val{color:var(--gold)}
+.retro-val{color:var(--rose)}
+
+/* NAV */
+#nav{position:fixed;bottom:0;left:0;right:0;z-index:100;
+  background:rgba(8,3,15,.95);backdrop-filter:blur(20px);
+  border-top:1px solid rgba(196,168,232,.1);
+  display:flex;align-items:center;justify-content:space-around;
+  padding:6px 0 max(6px,env(safe-area-inset-bottom))}
+.nav-btn{background:none;border:none;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:5px 8px;border-radius:10px;color:var(--dust);
+  font-family:'Raleway',sans-serif;font-size:9px;letter-spacing:.5px;
+  min-width:42px;transition:color .2s;text-decoration:none}
+.nav-btn.active{color:var(--silver)}
+.nav-btn.active .ni{filter:drop-shadow(0 0 5px rgba(196,168,232,.5))}
+.ni{font-size:18px;transition:transform .2s;display:block}
+.nav-btn:active .ni{transform:scale(.85)}
+
+/* CARDS */
+.card{background:rgba(22,11,42,.72);border:1px solid rgba(196,168,232,.1);
+  border-radius:var(--r);padding:18px;margin-bottom:14px;
+  backdrop-filter:blur(10px);box-shadow:var(--glow)}
+.card-title{font-family:'Cinzel Decorative',serif;font-size:11px;letter-spacing:3px;
+  color:var(--dust);text-transform:uppercase;margin-bottom:14px;
+  display:flex;align-items:center;gap:8px}
+.card-title::after{content:'';flex:1;height:1px;
+  background:linear-gradient(to right,rgba(196,168,232,.2),transparent)}
+
+/* PAGE HEADER */
+.page-wrap{padding:16px}
+.page-title{font-family:'Cinzel Decorative',serif;font-size:20px;
+  color:var(--silver);text-align:center;margin-bottom:4px;
+  text-shadow:0 0 30px rgba(196,168,232,.4)}
+.page-sub{font-size:13px;color:var(--dust);text-align:center;
+  font-style:italic;margin-bottom:20px}
+
+/* BUTTONS */
+.btn{border:none;border-radius:12px;cursor:pointer;
+  font-family:'Raleway',sans-serif;letter-spacing:1.5px;
+  text-transform:uppercase;transition:all .2s;width:100%;padding:12px}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,rgba(100,50,180,.45),rgba(60,80,200,.35));
+  border:1px solid rgba(196,168,232,.25);color:var(--moon);font-size:13px}
+.btn-teal{background:rgba(61,188,184,.15);border:1px solid rgba(61,188,184,.3);
+  color:var(--teal);font-size:12px;margin-top:10px}
+.btn-gold{background:rgba(212,168,67,.15);border:1px solid rgba(212,168,67,.3);
+  color:var(--gold);font-size:12px;margin-top:10px}
+
+/* INPUTS */
+.field-label{font-family:'Raleway',sans-serif;font-size:11px;color:var(--dust);
+  letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;display:block}
+.field-input{width:100%;background:rgba(30,16,56,.8);
+  border:1px solid rgba(196,168,232,.15);border-radius:10px;
+  color:var(--moon);font-family:'Crimson Pro',serif;font-size:16px;
+  padding:10px 14px;outline:none;transition:border-color .2s}
+.field-input:focus{border-color:rgba(196,168,232,.4)}
+textarea.field-input{min-height:110px;resize:vertical}
+.field-group{margin-bottom:12px}
+
+/* TAGS */
+.tag{background:rgba(196,168,232,.1);border:1px solid rgba(196,168,232,.15);
+  border-radius:20px;padding:4px 12px;
+  font-family:'Raleway',sans-serif;font-size:12px;color:var(--silver);display:inline-block}
+.tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+
+/* TOGGLE */
+.toggle-row{display:flex;background:rgba(30,16,56,.7);
+  border:1px solid rgba(196,168,232,.1);border-radius:10px;
+  overflow:hidden;margin-bottom:16px}
+.toggle-btn{flex:1;background:none;border:none;cursor:pointer;
+  padding:9px 6px;font-family:'Raleway',sans-serif;font-size:11px;
+  color:var(--dust);transition:all .2s;letter-spacing:.5px}
+.toggle-btn.active{background:rgba(196,168,232,.14);color:var(--silver)}
+
+/* MODAL */
+#modal-overlay{display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(4,1,10,.88);backdrop-filter:blur(8px);
+  align-items:flex-end;justify-content:center}
+#modal-overlay.open{display:flex;animation:fadeIn .2s ease}
+#modal-box{background:var(--void);border:1px solid rgba(196,168,232,.15);
+  border-radius:24px 24px 0 0;padding:24px 20px max(24px,env(safe-area-inset-bottom));
+  width:100%;max-width:640px;max-height:88vh;overflow-y:auto;
+  animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal-close{float:right;background:rgba(196,168,232,.1);border:none;
+  color:var(--dust);font-size:18px;border-radius:50%;
+  width:30px;height:30px;cursor:pointer;line-height:30px;text-align:center}
+.modal-title{font-family:'Cinzel Decorative',serif;font-size:16px;color:var(--silver);margin-bottom:3px}
+.modal-sub{font-size:13px;color:var(--dust);margin-bottom:18px}
+.modal-section{margin-bottom:14px}
+.modal-section h4{font-family:'Raleway',sans-serif;font-size:10px;
+  letter-spacing:2px;color:var(--dust);text-transform:uppercase;margin-bottom:5px}
+
+/* RESULT ROWS */
+.result-row{display:flex;justify-content:space-between;align-items:center;
+  padding:8px 0;border-bottom:1px solid rgba(196,168,232,.06)}
+.result-label{color:var(--dust);font-size:14px}
+.result-val{color:var(--moon);font-size:14px;text-align:right;max-width:60%}
+
+/* DIVIDER */
+.divider{height:1px;background:linear-gradient(to right,transparent,rgba(196,168,232,.15),transparent);margin:14px 0}
+
+/* TOAST */
+#toast{position:fixed;bottom:95px;left:50%;transform:translateX(-50%) translateY(16px);
+  background:rgba(61,188,184,.92);color:#fff;border-radius:20px;
+  padding:10px 24px;font-family:'Raleway',sans-serif;font-size:13px;
+  z-index:300;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:4px;border-radius:20px;
+  padding:3px 10px;font-family:'Raleway',sans-serif;font-size:10px;letter-spacing:.5px}
+.badge-retro{background:rgba(196,100,80,.15);border:1px solid rgba(196,100,80,.3);color:var(--ember)}
+.badge-teal{background:rgba(61,188,184,.12);border:1px solid rgba(61,188,184,.25);color:var(--teal)}
+.badge-gold{background:rgba(212,168,67,.12);border:1px solid rgba(212,168,67,.25);color:var(--gold)}
+.badge-green{background:rgba(122,184,122,.12);border:1px solid rgba(122,184,122,.25);color:var(--sage)}
+
+/* LOADING */
+.loading{color:var(--dust);font-style:italic;text-align:center;padding:24px;font-size:15px}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(196,168,232,.2);border-radius:2px}
+
+</style>
+<script src="https://unpkg.com/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
+</head>
+<body data-page="tools">
+<div id="starfield"></div><div class="nebula nb1"></div><div class="nebula nb2"></div>
+<div id="app">
+  <div id="hud"></div>
+  <div class="page-wrap">
+    <div class="page-title">🔭 Cosmic Tools</div>
+    <div class="page-sub">Divination, numerology, readings & more</div>
+
+    <!-- TOOL NAV -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px">
+      <button class="tool-nav-btn active" onclick="showTool('tarot',this)">🃏<br><small>Tarot</small></button>
+      <button class="tool-nav-btn" onclick="showTool('numerology',this)">🔢<br><small>Numerology</small></button>
+      <button class="tool-nav-btn" onclick="showTool('runes',this)">᚛<br><small>Runes</small></button>
+      <button class="tool-nav-btn" onclick="showTool('birthchart',this)">🌙<br><small>Birth Chart</small></button>
+    </div>
+
+    <div id="tool-tarot"></div>
+    <div id="tool-numerology" style="display:none"></div>
+    <div id="tool-runes" style="display:none"></div>
+    <div id="tool-birthchart" style="display:none"></div>
+    <div id="tool-research" style="display:none"></div>
+    <div id="tool-readings" style="display:none"></div>
+    <div id="tool-crystals" style="display:none"></div>
+  </div>
+</div>
+<div id="nav-mount"></div>
+
+<style>
+.tool-nav-btn{background:rgba(30,16,56,.6);border:1px solid rgba(196,168,232,.1);border-radius:12px;padding:12px 6px;cursor:pointer;color:var(--moon);font-family:'Raleway',sans-serif;font-size:11px;transition:all .2s}
+.tool-nav-btn.active{background:rgba(80,40,180,.3);border-color:rgba(196,168,232,.3);color:var(--silver)}
+.tarot-card-face{background:linear-gradient(135deg,rgba(80,40,160,.5),rgba(40,20,100,.7));border:2px solid rgba(196,168,232,.2);border-radius:16px;padding:30px 20px;text-align:center;cursor:pointer;transition:all .3s;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.num-result{background:rgba(30,16,56,.72);border:1px solid rgba(196,168,232,.1);border-radius:12px;padding:16px;margin-bottom:10px}
+.num-number{font-family:'Cinzel Decorative',serif;font-size:48px;color:var(--gold);text-align:center}
+.num-name{font-family:'Cinzel Decorative',serif;font-size:14px;color:var(--silver);text-align:center;margin-bottom:8px}
+.rune-draw-card{background:rgba(20,40,30,.5);border:1px solid rgba(61,188,184,.2);border-radius:14px;padding:16px;text-align:center;margin-bottom:8px}
+</style>
+
+<script>
+// ── COSMIC WHISPERS · shared.js ──
+
+const SUPA_URL = 'https://jzitxcubechrxochtztm.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6aXR4Y3ViZWNocnhvY2h0enRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4OTIwMjAsImV4cCI6MjA4ODQ2ODAyMH0.EiQrFfb-8AF9Jjc1AfI4txYxHf-XzazHF-XY7N4uLEk';
+
+async function dbInsert(table, row) {
+  try {
+    const r = await fetch(`${SUPA_URL}/rest/v1/${table}`, {
+      method:'POST', headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'Prefer':'return=minimal'},
+      body: JSON.stringify(row)
+    });
+    return r.ok;
+  } catch(e) { return false; }
+}
+async function dbSelect(table, limit=50) {
+  try {
+    const r = await fetch(`${SUPA_URL}/rest/v1/${table}?order=created_at.desc&limit=${limit}`, {
+      headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`}
+    });
+    return r.ok ? await r.json() : [];
+  } catch(e) { return []; }
+}
+
+function getTesterName() {
+  let n = localStorage.getItem('cw_tester');
+  if (!n) { n = prompt('Welcome to Cosmic Whispers Beta!\nEnter your name:') || 'Seeker'; localStorage.setItem('cw_tester', n); }
+  return n;
+}
+
+function initStarfield() {
+  const sf = document.getElementById('starfield'); if (!sf) return;
+  for (let i=0;i<160;i++) {
+    const s=document.createElement('div'); s.className='star';
+    const sz=Math.random()*2.5+0.4;
+    s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--lo:${(Math.random()*.3+.05).toFixed(2)};--hi:${(Math.random()*.6+.4).toFixed(2)};--dur:${(Math.random()*4+2).toFixed(1)}s;--delay:-${(Math.random()*6).toFixed(1)}s`;
+    sf.appendChild(s);
+  }
+}
+
+const SIGNS=[{name:'Aries',glyph:'♈'},{name:'Taurus',glyph:'♉'},{name:'Gemini',glyph:'♊'},{name:'Cancer',glyph:'♋'},{name:'Leo',glyph:'♌'},{name:'Virgo',glyph:'♍'},{name:'Libra',glyph:'♎'},{name:'Scorpio',glyph:'♏'},{name:'Sagittarius',glyph:'♐'},{name:'Capricorn',glyph:'♑'},{name:'Aquarius',glyph:'♒'},{name:'Pisces',glyph:'♓'}];
+
+function lonToSign(lon){const n=((lon%360)+360)%360,i=Math.floor(n/30);return{...SIGNS[i],deg:(n-i*30).toFixed(1),idx:i};}
+
+// Safe astronomy wrappers - never crash, always return something
+function getSunLon(d){
+  try{ if(typeof Astronomy==='undefined') return estimateSunLon(d); return Astronomy.SunPosition(d).elon; }
+  catch(e){ return estimateSunLon(d); }
+}
+function estimateSunLon(d) {
+  // Rough Sun longitude estimate based on day of year
+  const start = new Date(d.getFullYear(), 0, 0);
+  const diff = d - start;
+  const dayOfYear = Math.floor(diff / 86400000);
+  return ((dayOfYear - 80) / 365.25) * 360;
+}
+function getMoonLon(d){
+  try{
+    if(typeof Astronomy==='undefined') return estimateMoonLon(d);
+    const eq=Astronomy.Equator('Moon',d,null,false,true),ec=Astronomy.Ecliptic(eq.vec);
+    return((ec.elon%360)+360)%360;
+  }catch(e){ return estimateMoonLon(d); }
+}
+function estimateMoonLon(d) {
+  // Rough Moon longitude estimate
+  const knownNew = new Date('2024-01-11').getTime();
+  const synodicMs = 29.53059 * 86400000;
+  const elapsed = d.getTime() - knownNew;
+  const phase = ((elapsed % synodicMs) + synodicMs) % synodicMs;
+  return (phase / synodicMs) * 360;
+}
+function getPlanetLon(body,d){
+  try{
+    if(typeof Astronomy==='undefined') return null;
+    const eq=Astronomy.Equator(body,d,null,false,true),ec=Astronomy.Ecliptic(eq.vec);
+    return((ec.elon%360)+360)%360;
+  }catch(e){ return null; }
+}
+function isRetro(body,date){
+  if(body==='Sun'||body==='Moon')return false;
+  try{
+    if(typeof Astronomy==='undefined') return false;
+    const l1=getPlanetLon(body,new Date(date-86400000)),l2=getPlanetLon(body,new Date(date+86400000));
+    if(l1===null||l2===null)return false;
+    let d=l2-l1;if(d>180)d-=360;if(d<-180)d+=360;return d<0;
+  }catch(e){return false;}
+}
+function getMoonPhase(d){
+  try{
+    if(typeof Astronomy==='undefined') return estimateMoonPhase(d);
+    const a=Astronomy.MoonPhase(d),il=Math.round((1-Math.cos(a*Math.PI/180))/2*100);
+    const p=[[22.5,'New Moon','🌑'],[67.5,'Waxing Crescent','🌒'],[112.5,'First Quarter','🌓'],[157.5,'Waxing Gibbous','🌔'],[202.5,'Full Moon','🌕'],[247.5,'Waning Gibbous','🌖'],[292.5,'Last Quarter','🌗'],[337.5,'Waning Crescent','🌘']];
+    for(const[t,n,i]of p)if(a<t)return{name:n,icon:i,illum:il,angle:a};
+    return{name:'New Moon',icon:'🌑',illum:il,angle:a};
+  }catch(e){ return estimateMoonPhase(d); }
+}
+function estimateMoonPhase(d) {
+  const lon = estimateMoonLon(d);
+  const sunLon = estimateSunLon(d);
+  const angle = ((lon - sunLon) + 360) % 360;
+  const il = Math.round((1-Math.cos(angle*Math.PI/180))/2*100);
+  const p=[[22.5,'New Moon','🌑'],[67.5,'Waxing Crescent','🌒'],[112.5,'First Quarter','🌓'],[157.5,'Waxing Gibbous','🌔'],[202.5,'Full Moon','🌕'],[247.5,'Waning Gibbous','🌖'],[292.5,'Last Quarter','🌗'],[337.5,'Waning Crescent','🌘']];
+  for(const[t,n,i]of p)if(angle<t)return{name:n,icon:i,illum:il,angle};
+  return{name:'New Moon',icon:'🌑',illum:il,angle};
+}
+
+// Sun/Moon rise/set with fallback
+function getSunTimes(date, lat, lon) {
+  try {
+    if(typeof Astronomy==='undefined'||!lat||!lon) return {rise:'6:30 AM',set:'6:30 PM',daylight:'12.0h'};
+    const obs=new Astronomy.Observer(lat,lon,0);
+    const fmt=d=>d?new Date(d.date).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'—';
+    const sr=Astronomy.SearchRiseSet('Sun',obs,+1,date,1);
+    const ss=Astronomy.SearchRiseSet('Sun',obs,-1,date,1);
+    const hrs=sr&&ss?((new Date(ss.date)-new Date(sr.date))/3600000).toFixed(1)+'h':'12h';
+    return{rise:fmt(sr),set:fmt(ss),daylight:hrs};
+  }catch(e){return{rise:'6:30 AM',set:'6:30 PM',daylight:'12.0h'};}
+}
+function getMoonTimes(date, lat, lon) {
+  try {
+    if(typeof Astronomy==='undefined'||!lat||!lon) return {rise:'—',set:'—'};
+    const obs=new Astronomy.Observer(lat,lon,0);
+    const fmt=d=>d?new Date(d.date).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'—';
+    return{rise:fmt(Astronomy.SearchRiseSet('Moon',obs,+1,date,1)),set:fmt(Astronomy.SearchRiseSet('Moon',obs,-1,date,1))};
+  }catch(e){return{rise:'—',set:'—'};}
+}
+
+const PLANETS=[
+  {name:'Sun',glyph:'☉',body:'Sun',color:'#f5c842',emoji:'🌞',au:0},
+  {name:'Moon',glyph:'☽',body:'Moon',color:'#e8daf5',emoji:'🌙',au:.00257},
+  {name:'Mercury',glyph:'☿',body:'Mercury',color:'#a8c4e0',emoji:'⚡',au:.387},
+  {name:'Venus',glyph:'♀',body:'Venus',color:'#f5c084',emoji:'💛',au:.723},
+  {name:'Mars',glyph:'♂',body:'Mars',color:'#e06060',emoji:'🔴',au:1.524},
+  {name:'Jupiter',glyph:'♃',body:'Jupiter',color:'#f0a840',emoji:'🟠',au:5.203},
+  {name:'Saturn',glyph:'♄',body:'Saturn',color:'#c8b870',emoji:'🪐',au:9.537},
+  {name:'Uranus',glyph:'⛢',body:'Uranus',color:'#80e0e0',emoji:'🔵',au:19.19},
+  {name:'Neptune',glyph:'♆',body:'Neptune',color:'#6080e8',emoji:'🔮',au:30.07},
+  {name:'Pluto',glyph:'♇',body:'Pluto',color:'#8080a0',emoji:'⚫',au:39.48},
+];
+
+function computeSigns(date){
+  const s={};
+  for(const p of PLANETS){
+    let lon = p.body==='Sun' ? getSunLon(date)
+            : p.body==='Moon' ? getMoonLon(date)
+            : getPlanetLon(p.body,date);
+    // Use estimate for outer planets if Astronomy not ready
+    if(lon===null){
+      lon = estimateSunLon(date) + (p.au * 30); // rough placeholder
+    }
+    s[p.name]=lonToSign(lon);
+    s[p.name].retro=isRetro(p.body,date.getTime());
+  }
+  return s;
+}
+
+const DAY_RULERS=['Sun','Moon','Mars','Mercury','Jupiter','Venus','Saturn'];
+const DAY_GLYPHS={Sun:'☉',Moon:'☽',Mars:'♂',Mercury:'☿',Jupiter:'♃',Venus:'♀',Saturn:'♄'};
+const DAY_NAMES=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+const CACHE_KEY='cw_v5';
+function loadCache(){try{return JSON.parse(localStorage.getItem(CACHE_KEY));}catch(e){return null;}}
+function saveCache(d){try{localStorage.setItem(CACHE_KEY,JSON.stringify({ts:Date.now(),d}));}catch(e){}}
+function cacheStale(c){
+  if(!c||!c.d)return true;
+  if(Date.now()-c.ts>4*3600000)return true;
+  return false;
+}
+
+function renderHUD(signs,moon){
+  const el=document.getElementById('hud');if(!el)return;
+  const sun=signs?.Sun,ruler=DAY_RULERS[new Date().getDay()],
+        retros=signs?Object.values(signs).filter(s=>s.retro).length:0,now=new Date();
+  el.innerHTML=`
+    <div class="hud-item"><div class="hud-label">SUN</div><div class="hud-val sun-val">${sun?sun.glyph+' '+sun.name:'♈ Aries'}</div></div>
+    <div class="hud-item"><div class="hud-label">MOON</div><div class="hud-val">${moon?moon.icon+' '+moon.illum+'%':'🌙'}</div></div>
+    <div class="hud-item"><div class="hud-label">RULER</div><div class="hud-val">${DAY_GLYPHS[ruler]} ${ruler}</div></div>
+    <div class="hud-item"><div class="hud-label">℞</div><div class="hud-val retro-val">${retros>0?'● '+retros:'● 0'}</div></div>
+    <div class="hud-item"><div class="hud-label">TODAY</div><div class="hud-val">${now.toLocaleDateString([],{month:'short',day:'numeric'})}</div></div>
+    <div class="hud-item"><div class="hud-label">UPDATED</div><div class="hud-val">${now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div></div>`;
+}
+
+function showToast(msg){
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t);}
+  t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);
+}
+function copyText(text){
+  navigator.clipboard.writeText(text).then(()=>showToast('✦ Copied!')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showToast('✦ Copied!');
+  });
+}
+
+const NAV_ITEMS=[
+  {page:'index',icon:'🏠',label:'Home',href:'index.html'},
+  {page:'horoscope',icon:'♈',label:'Signs',href:'horoscope.html'},
+  {page:'retro',icon:'⚡',label:'Retro',href:'retro.html'},
+  {page:'shadows',icon:'📖',label:'Shadows',href:'shadows.html'},
+  {page:'journal',icon:'📝',label:'Journal',href:'journal.html'},
+  {page:'wheel',icon:'☸',label:'Wheel',href:'wheel.html'},
+  {page:'planets',icon:'🪐',label:'Planets',href:'planets.html'},
+  {page:'tools',icon:'🔭',label:'Tools',href:'tools.html'},
+];
+function injectNav(active){
+  const el=document.getElementById('nav-mount');if(!el)return;
+  el.innerHTML=`<nav id="nav">${NAV_ITEMS.map(n=>`<a class="nav-btn${n.page===active?' active':''}" href="${n.href}"><span class="ni">${n.icon}</span>${n.label}</a>`).join('')}</nav>`;
+}
+function openModal(html){
+  let ov=document.getElementById('modal-overlay');
+  if(!ov){ov=document.createElement('div');ov.id='modal-overlay';ov.innerHTML='<div id="modal-box"></div>';document.body.appendChild(ov);
+    ov.addEventListener('click',e=>{if(e.target===ov)closeModal();});}
+  document.getElementById('modal-box').innerHTML=html;
+  ov.classList.add('open');
+}
+function closeModal(){const ov=document.getElementById('modal-overlay');if(ov)ov.classList.remove('open');}
+
+// Wait for Astronomy library to load before computing
+function waitForAstronomy(cb, tries=0) {
+  if(typeof Astronomy !== 'undefined') { cb(); return; }
+  if(tries > 20) { cb(); return; } // give up after 2s, use estimates
+  setTimeout(() => waitForAstronomy(cb, tries+1), 100);
+}
+
+window.addEventListener('load',()=>{
+  initStarfield();
+  injectNav(document.body.dataset.page);
+});
+
+</script>
+<script>
+// ── TAROT DATA ────────────────────────────────────────────────────────────────
+const TAROT_DECK = [
+  {name:'The Fool',emoji:'🃏',num:'0',suit:'Major',meaning:'New beginnings, innocence, spontaneity, a free spirit. Leap of faith.',reversed:'Recklessness, risk without thought, naivety.',keywords:['Beginnings','Innocence','Spontaneity','Freedom']},
+  {name:'The Magician',emoji:'🎩',num:'I',suit:'Major',meaning:'Manifestation, resourcefulness, power, inspired action.',reversed:'Manipulation, poor planning, untapped talents.',keywords:['Manifestation','Power','Action','Willpower']},
+  {name:'The High Priestess',emoji:'🌙',num:'II',suit:'Major',meaning:'Intuition, sacred knowledge, divine feminine, the subconscious.',reversed:'Secrets, disconnection from intuition, withdrawal.',keywords:['Intuition','Mystery','Subconscious','Inner voice']},
+  {name:'The Empress',emoji:'🌿',num:'III',suit:'Major',meaning:'Femininity, beauty, nature, abundance, fertility.',reversed:'Creative block, dependence, smothering.',keywords:['Nature','Abundance','Femininity','Creation']},
+  {name:'The Emperor',emoji:'🏛️',num:'IV',suit:'Major',meaning:'Authority, establishment, structure, a father figure.',reversed:'Domination, excessive control, rigidity, inflexibility.',keywords:['Authority','Structure','Stability','Power']},
+  {name:'The Hierophant',emoji:'⛪',num:'V',suit:'Major',meaning:'Spiritual wisdom, religious beliefs, conformity, tradition.',reversed:'Personal beliefs, freedom, challenging the status quo.',keywords:['Tradition','Wisdom','Guidance','Conformity']},
+  {name:'The Lovers',emoji:'💕',num:'VI',suit:'Major',meaning:'Love, harmony, relationships, values alignment, choices.',reversed:'Self-love needed, disharmony, imbalance, misalignment.',keywords:['Love','Choices','Alignment','Partnership']},
+  {name:'The Chariot',emoji:'🐎',num:'VII',suit:'Major',meaning:'Control, willpower, success, action, determination.',reversed:'Self-discipline needed, opposition, lack of direction.',keywords:['Control','Victory','Determination','Drive']},
+  {name:'Strength',emoji:'🦁',num:'VIII',suit:'Major',meaning:'Strength, courage, patience, control, compassion.',reversed:'Inner strength needed, self-doubt, low energy.',keywords:['Courage','Patience','Compassion','Inner strength']},
+  {name:'The Hermit',emoji:'🏔️',num:'IX',suit:'Major',meaning:'Soul-searching, introspection, being alone, inner guidance.',reversed:'Isolation, loneliness, withdrawal, lost your way.',keywords:['Solitude','Introspection','Wisdom','Guidance']},
+  {name:'Wheel of Fortune',emoji:'☸️',num:'X',suit:'Major',meaning:'Good luck, karma, life cycles, destiny, a turning point.',reversed:'Bad luck, lack of control, clinging to control.',keywords:['Luck','Karma','Cycles','Turning point']},
+  {name:'Justice',emoji:'⚖️',num:'XI',suit:'Major',meaning:'Justice, fairness, truth, cause and effect, law.',reversed:'Unfairness, lack of accountability, dishonesty.',keywords:['Justice','Truth','Fairness','Law']},
+  {name:'The Hanged Man',emoji:'🙃',num:'XII',suit:'Major',meaning:'Pause, surrender, letting go, new perspectives, enlightenment.',reversed:'Delays, resistance, stalling, indecision.',keywords:['Pause','Surrender','Perspective','Contemplation']},
+  {name:'Death',emoji:'💀',num:'XIII',suit:'Major',meaning:'Endings, change, transformation, transition, letting go.',reversed:'Resistance to change, unable to move on, stagnation.',keywords:['Transformation','Endings','Change','Transition']},
+  {name:'Temperance',emoji:'⚗️',num:'XIV',suit:'Major',meaning:'Balance, moderation, patience, purpose, meaning.',reversed:'Imbalance, excess, self-healing needed, realignment.',keywords:['Balance','Moderation','Purpose','Healing']},
+  {name:'The Devil',emoji:'😈',num:'XV',suit:'Major',meaning:'Shadow self, attachment, addiction, restriction, sexuality.',reversed:'Releasing limiting beliefs, exploring dark thoughts, detachment.',keywords:['Shadow','Attachment','Materialism','Bondage']},
+  {name:'The Tower',emoji:'🗼',num:'XVI',suit:'Major',meaning:'Sudden change, upheaval, chaos, revelation, awakening.',reversed:'Personal transformation, fear of change, averting disaster.',keywords:['Upheaval','Revelation','Chaos','Change']},
+  {name:'The Star',emoji:'⭐',num:'XVII',suit:'Major',meaning:'Hope, faith, purpose, renewal, spirituality.',reversed:'Lack of faith, despair, self-trust, disconnection.',keywords:['Hope','Faith','Renewal','Inspiration']},
+  {name:'The Moon',emoji:'🌕',num:'XVIII',suit:'Major',meaning:'Illusion, fear, the unconscious, the subconscious, confusion.',reversed:'Release of fear, repressed emotion, inner confusion.',keywords:['Illusion','Fear','Unconscious','Dreams']},
+  {name:'The Sun',emoji:'☀️',num:'XIX',suit:'Major',meaning:'Positivity, fun, warmth, success, vitality.',reversed:'Inner child blocked, pessimism, sadness.',keywords:['Joy','Success','Vitality','Positivity']},
+  {name:'Judgement',emoji:'📯',num:'XX',suit:'Major',meaning:'Judgement, rebirth, inner calling, absolution.',reversed:'Self-doubt, inner critic, refusal of self-examination.',keywords:['Rebirth','Awakening','Calling','Transformation']},
+  {name:'The World',emoji:'🌍',num:'XXI',suit:'Major',meaning:'Completion, integration, accomplishment, travel, fulfilment.',reversed:'Incomplete, no closure, not learning your lessons.',keywords:['Completion','Achievement','Integration','Travel']},
+  // Wands
+  {name:'Ace of Wands',emoji:'🪄',num:'A',suit:'Wands',meaning:'New creative spark, inspiration, potential, new beginnings.',reversed:'Delays, lack of motivation, creative block.',keywords:['Inspiration','Creativity','Beginning','Potential']},
+  {name:'Five of Wands',emoji:'🪄',num:'5',suit:'Wands',meaning:'Conflict, disagreements, competition, tension, diversity.',reversed:'Avoiding conflict, respecting differences, inner conflict.',keywords:['Conflict','Competition','Tension','Diversity']},
+  {name:'Ten of Wands',emoji:'🪄',num:'10',suit:'Wands',meaning:'Burden, extra responsibility, hard work, completion.',reversed:'Doing it all, carrying the burden, delegation.',keywords:['Burden','Responsibility','Hardship','Completion']},
+  // Cups
+  {name:'Ace of Cups',emoji:'🏆',num:'A',suit:'Cups',meaning:'Love, compassion, creativity, new emotional beginnings.',reversed:'Emotional loss, blocked creativity, emptiness.',keywords:['Love','Compassion','Creativity','New beginnings']},
+  {name:'Two of Cups',emoji:'💞',num:'2',suit:'Cups',meaning:'Unified love, partnership, mutual attraction.',reversed:'Self-love needed, break-ups, disharmony.',keywords:['Partnership','Love','Harmony','Connection']},
+  {name:'Queen of Cups',emoji:'👑',num:'Q',suit:'Cups',meaning:'Compassionate, caring, emotionally stable, intuitive.',reversed:'Inner feelings, self-care, self-love.',keywords:['Compassion','Intuition','Emotional stability','Care']},
+  // Swords
+  {name:'Ace of Swords',emoji:'⚔️',num:'A',suit:'Swords',meaning:'Breakthrough, clarity, sharp mind, truth, new ideas.',reversed:'Confusion, brutality, chaos in thoughts.',keywords:['Clarity','Truth','Breakthrough','Justice']},
+  {name:'Ten of Swords',emoji:'⚔️',num:'10',suit:'Swords',meaning:'Painful endings, deep wounds, betrayal. But dawn follows.',reversed:'Recovery, regeneration, resisting the inevitable.',keywords:['Endings','Pain','Betrayal','New dawn']},
+  // Pentacles
+  {name:'Ace of Pentacles',emoji:'🌟',num:'A',suit:'Pentacles',meaning:'New financial or career opportunity, manifestation, abundance.',reversed:'Lost opportunity, bad investment, poor planning.',keywords:['Opportunity','Abundance','Manifestation','New start']},
+  {name:'Ten of Pentacles',emoji:'🌟',num:'10',suit:'Pentacles',meaning:'Wealth, financial security, family, long-term success.',reversed:'Family disputes, bankruptcy, loss.',keywords:['Wealth','Legacy','Family','Security']},
+];
+
+// ── NUMEROLOGY ────────────────────────────────────────────────────────────────
+const NUM_MEANINGS = {
+  1:{name:'The Pioneer',symbol:'⚡',meaning:'Leadership, independence, new beginnings. You are a trailblazer with strong individuality and the courage to stand alone. Your path is one of self-mastery.',positive:'Driven, independent, creative, courageous',negative:'Lonely, stubborn, aggressive',crystals:['Red Jasper','Carnelian'],archetype:'The Leader'},
+  2:{name:'The Diplomat',symbol:'🤝',meaning:'Partnership, balance, sensitivity. You are a natural peacemaker gifted with intuition and cooperation. Relationships and harmony are your sacred path.',positive:'Diplomatic, intuitive, cooperative, patient',negative:'Oversensitive, indecisive, passive',crystals:['Moonstone','Rose Quartz'],archetype:'The Peacemaker'},
+  3:{name:'The Creator',symbol:'✨',meaning:'Creativity, expression, joy. You are a natural artist and communicator, here to bring beauty and inspiration into the world through your unique voice.',positive:'Creative, expressive, joyful, optimistic',negative:'Scattered, superficial, dramatic',crystals:['Citrine','Sunstone'],archetype:'The Artist'},
+  4:{name:'The Builder',symbol:'🏗️',meaning:'Stability, discipline, hard work. You are the master builder, here to create lasting structures — physical, financial, or philosophical — through dedication.',positive:'Reliable, disciplined, practical, loyal',negative:'Rigid, workaholic, repressed',crystals:['Black Tourmaline','Smoky Quartz'],archetype:'The Architect'},
+  5:{name:'The Adventurer',symbol:'🌍',meaning:'Freedom, change, adventure. You are the seeker, here to experience all that life has to offer. Your path is freedom, travel, and the constant reinvention of self.',positive:'Adventurous, adaptable, curious, magnetic',negative:'Restless, irresponsible, scattered',crystals:['Labradorite','Turquoise'],archetype:'The Explorer'},
+  6:{name:'The Nurturer',symbol:'🏡',meaning:'Family, harmony, healing. You are the cosmic parent, here to nurture, protect, and create beauty in home and community. Love is your guiding force.',positive:'Nurturing, responsible, artistic, healing',negative:'Controlling, self-sacrificing, anxious',crystals:['Green Aventurine','Rose Quartz'],archetype:'The Caregiver'},
+  7:{name:'The Seeker',symbol:'🔮',meaning:'Wisdom, mystery, inner knowing. You are the mystic philosopher, here to seek truth beyond appearances. Solitude, study, and spiritual mastery are your path.',positive:'Analytical, wise, spiritual, perceptive',negative:'Isolated, secretive, cold, cynical',crystals:['Amethyst','Fluorite'],archetype:'The Mystic'},
+  8:{name:'The Power',symbol:'⚖️',meaning:'Power, abundance, authority. You are the cosmic CEO, here to master the material world and wield power with wisdom. Financial mastery and leadership are your destiny.',positive:'Powerful, ambitious, balanced, executive',negative:'Domineering, materialistic, workaholic',crystals:['Citrine','Pyrite'],archetype:'The Executive'},
+  9:{name:'The Sage',symbol:'🌟',meaning:'Completion, wisdom, humanitarian love. You are the old soul, here to complete cycles, share earned wisdom, and serve the greater good with compassion.',positive:'Compassionate, wise, generous, spiritual',negative:'Resentful, overly idealistic, scattered',crystals:['Clear Quartz','Selenite'],archetype:'The Humanitarian'},
+  11:{name:'Master Intuitive',symbol:'⚡🌙',meaning:'Spiritual awakening, intuition, inspiration. As a Master Number, your path carries both the lessons of 2 and the higher calling of spiritual leadership and enlightened communication.',positive:'Highly intuitive, inspiring, visionary, psychic',negative:'Anxiety, self-doubt, nervous tension',crystals:['Labradorite','Moonstone'],archetype:'The Visionary'},
+  22:{name:'Master Builder',symbol:'🏗️⭐',meaning:'Master manifestor, large-scale building. You are here to build something that outlasts you — a legacy, a system, a movement. The most powerful manifesting number.',positive:'Visionary builder, practical idealist, leadership',negative:'Overwhelmed by potential, perfectionism',crystals:['Malachite','Pyrite'],archetype:'The Master Builder'},
+  33:{name:'Master Teacher',symbol:'💗⭐',meaning:'Compassionate service, master healer, cosmic love. The rarest and most spiritually gifted number — called to teach, heal, and uplift all of humanity.',positive:'Unconditional love, healing, nurturing, wisdom',negative:'Martyr complex, self-sacrifice, burden',crystals:['Rose Quartz','Selenite'],archetype:'The Master Teacher'},
+};
+
+function reduceNumber(n) {
+  while (n > 9 && n !== 11 && n !== 22 && n !== 33) {
+    n = String(n).split('').reduce((a,d) => a+parseInt(d), 0);
+  }
+  return n;
+}
+
+function getLifePath(dateStr) {
+  const parts = dateStr.split('-');
+  if (parts.length !== 3) return null;
+  const digits = (parseInt(parts[0]) + parseInt(parts[1]) + parseInt(parts[2]));
+  return reduceNumber(digits);
+}
+
+function getExpressionNumber(name) {
+  const PYTHAGOREAN = {A:1,B:2,C:3,D:4,E:5,F:6,G:7,H:8,I:9,J:1,K:2,L:3,M:4,N:5,O:6,P:7,Q:8,R:9,S:1,T:2,U:3,V:4,W:5,X:6,Y:7,Z:8};
+  const sum = name.toUpperCase().replace(/[^A-Z]/g,'').split('').reduce((a,c) => a+(PYTHAGOREAN[c]||0), 0);
+  return reduceNumber(sum);
+}
+
+function getSoulUrge(name) {
+  const PYTHAGOREAN = {A:1,E:5,I:9,O:6,U:3};
+  const sum = name.toUpperCase().replace(/[^A-Z]/g,'').split('').reduce((a,c) => a+(PYTHAGOREAN[c]||0), 0);
+  return reduceNumber(sum);
+}
+
+// ── RUNES ─────────────────────────────────────────────────────────────────────
+const RUNES_DATA = [
+  {char:'ᚠ',name:'Fehu',meaning:'Wealth, abundance, new beginnings, cattle and prosperity. The first rune of increase.',divination:'Financial gain coming, new ventures, abundance',reversed:'Loss of property, delays in receiving'},
+  {char:'ᚢ',name:'Uruz',meaning:'Strength, health, primal force, endurance. The wild ox — unstoppable vital energy.',divination:'Physical strength, health, masculine power',reversed:'Weakness, illness, missed opportunity'},
+  {char:'ᚦ',name:'Thurisaz',meaning:'Protection, gateway, warning. The thorn that protects the rose. Chaos that leads to clarity.',divination:'Defense, needed pause, clearing obstacles',reversed:'Danger, reckless action, passive aggression'},
+  {char:'ᚨ',name:'Ansuz',meaning:'Divine inspiration, communication, Odin\'s voice, poetry, wisdom from above.',divination:'Important message coming, wisdom, divine communication',reversed:'Miscommunication, trickery, poor advice'},
+  {char:'ᚱ',name:'Raidho',meaning:'Journey, rhythm, right action, travel, the cosmic ride forward.',divination:'Journey ahead, movement in right direction, progress',reversed:'Journey disrupted, crisis, irrationality'},
+  {char:'ᚲ',name:'Kenaz',meaning:'Vision, revelation, knowledge, torch in the dark, creative fire.',divination:'Clarity coming, creative breakthrough, insight',reversed:'Disease, breakdown, loss of direction'},
+  {char:'ᚷ',name:'Gebo',meaning:'Gift, generosity, partnership, sacred exchange, the X of meeting.',divination:'Partnership forming, gift coming, balance in exchange',reversed:'No reversed position — always a gift'},
+  {char:'ᚹ',name:'Wunjo',meaning:'Joy, comfort, pleasure, harmony, wish fulfilled, bliss.',divination:'Joy ahead, harmony, achievement, success',reversed:'Sorrow, frenzy, alienation, raging'},
+  {char:'ᚺ',name:'Hagalaz',meaning:'Disruption, hailstorm clearing the way, transformation through destruction.',divination:'Disruption that ultimately clears, transformation',reversed:'No reversed — always a disruption that clarifies'},
+  {char:'ᚾ',name:'Nauthiz',meaning:'Need, constraint, necessity. What must be endured. The friction that creates fire.',divination:'Patience required, delay, necessity reveals itself',reversed:'Constraint lifting, freedom approaching'},
+  {char:'ᛁ',name:'Isa',meaning:'Ice, standstill, frozen potential. Wait before acting — all is paused.',divination:'Pause, stillness needed, ego check',reversed:'No reversed — ice simply is'},
+  {char:'ᛃ',name:'Jera',meaning:'Year, harvest, cycles completing, reward for effort, right timing.',divination:'Reward coming for past efforts, patience needed',reversed:'No reversed — the harvest always comes'},
+  {char:'ᛇ',name:'Eihwaz',meaning:'Yew tree — death and rebirth, the world axis, endurance, Yggdrasil.',divination:'Long-term goal in sight, endurance required',reversed:'Confusion, misdirection, grasping'},
+  {char:'ᛈ',name:'Perthro',meaning:'Mystery, lot-cup, fate, chance, the feminine container of the unknown.',divination:'Hidden forces at work, fate, unexpected revelation',reversed:'Stagnation, loneliness, malaise, addiction'},
+  {char:'ᛉ',name:'Algiz',meaning:'Protection, awakening, divine connection, elk sedge, the witch\'s shield.',divination:'Protection available, spiritual connection strengthening',reversed:'Hidden danger, vulnerability, warning'},
+  {char:'ᛊ',name:'Sowilo',meaning:'Sun, victory, wholeness, the solar wheel, success and illumination.',divination:'Victory, success, clarity, life force returning',reversed:'No reversed — the sun always shines somewhere'},
+  {char:'ᛏ',name:'Tiwaz',meaning:'Justice, victory, sacrifice, Tyr who gave his hand for the good of all.',divination:'Justice, victory after sacrifice, courage to act',reversed:'Injustice, cowardice, blocked energy'},
+  {char:'ᛒ',name:'Berkano',meaning:'Birch tree, birth, growth, the great mother, new green life.',divination:'New beginning, birth, fertility, growth',reversed:'Family troubles, anxiety, spiritual disconnection'},
+  {char:'ᛖ',name:'Ehwaz',meaning:'Horse, movement, swift change, trust between horse and rider.',divination:'Progress, swift change, trusted partner',reversed:'Recklessness, moving too fast, unsteady'},
+  {char:'ᛗ',name:'Mannaz',meaning:'Humanity, the self, the community, our shared human destiny.',divination:'Self-awareness, cooperation, human potential',reversed:'Depression, cunning enemies, self-deception'},
+  {char:'ᛚ',name:'Laguz',meaning:'Water, flow, the unconscious, deep knowing, the lake and the source.',divination:'Go with the flow, emotional strength, imagination',reversed:'Fear of water, confusion, blocked intuition'},
+  {char:'ᛜ',name:'Ingwaz',meaning:'Fertility, new beginning, the earth god Ing, gestation and potential.',divination:'Fertile opportunity, completion of one phase',reversed:'No reversed — potential always exists'},
+  {char:'ᛞ',name:'Dagaz',meaning:'Day, breakthrough, dawn, the sacred light between worlds.',divination:'Breakthrough imminent, transformation, awakening',reversed:'No reversed — the dawn always comes'},
+  {char:'ᛟ',name:'Othala',meaning:'Ancestral home, heritage, property, the wisdom of the bloodline.',divination:'Ancestral help, home and family, inheritance',reversed:'Homeless, rootlessness, family difficulties'},
+];
+
+let currentSpread = 1;
+let tarotRevealed = false;
+let currentTarotCard = null;
+
+function showTool(name, btn) {
+  document.querySelectorAll('.tool-nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  ['tarot','numerology','runes','birthchart','research','readings','crystals'].forEach(t => {
+    document.getElementById('tool-'+t).style.display = t===name?'':'none';
+  });
+}
+
+// TAROT INIT
+function initTarot() {
+  const el = document.getElementById('tool-tarot');
+  tarotRevealed = false;
+  const today = new Date().toDateString();
+  const seed = today.split('').reduce((a,c) => a+c.charCodeAt(0), 0);
+  currentTarotCard = TAROT_DECK[seed % TAROT_DECK.length];
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-title">🃏 Daily Tarot</div>
+      <div style="font-size:12px;color:var(--dust);margin-bottom:16px">Your card for ${new Date().toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'})}</div>
+      <div id="tarot-area" onclick="revealTarot()" style="cursor:pointer;margin-bottom:14px">
+        <div id="tarot-back-face">
+          <div class="tarot-card-face">
+            <div style="font-size:48px;margin-bottom:10px">🔮</div>
+            <div style="font-size:16px;color:var(--dust)">Tap to reveal your daily card</div>
+            <div style="font-size:24px;margin-top:10px;letter-spacing:8px;color:rgba(196,168,232,.3)">★ ★ ★</div>
+          </div>
+        </div>
+        <div id="tarot-front-face" style="display:none">
+          <div style="text-align:center;padding:20px;background:rgba(30,16,56,.6);border:2px solid rgba(196,168,232,.2);border-radius:16px">
+            <div style="font-size:64px;margin-bottom:10px" id="t-emoji"></div>
+            <div style="font-family:'Cinzel Decorative',serif;font-size:18px;color:var(--gold);margin-bottom:4px" id="t-name"></div>
+            <div style="font-family:'Raleway',sans-serif;font-size:12px;color:var(--dust);margin-bottom:12px" id="t-num"></div>
+            <div class="tag-row" style="justify-content:center;margin-bottom:12px" id="t-keywords"></div>
+            <div style="font-size:15px;color:var(--moon);line-height:1.7;margin-bottom:10px" id="t-meaning"></div>
+            <div style="font-size:13px;color:var(--dust);font-style:italic" id="t-reversed"></div>
+          </div>
+        </div>
+      </div>
+      <div id="tarot-btns" style="display:none;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button class="btn btn-primary" onclick="newTarotCard()">🔄 New Card</button>
+        <button class="btn btn-teal" onclick="copyTarotCard()">📋 Copy to OneNote</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🃏 Full Deck Reading</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+        <button class="toggle-btn ${currentSpread===1?'active':''}" onclick="setSpread(1,this)">1 Card</button>
+        <button class="toggle-btn ${currentSpread===3?'active':''}" onclick="setSpread(3,this)">3 Card<br><small>P/P/F</small></button>
+        <button class="toggle-btn ${currentSpread===5?'active':''}" onclick="setSpread(5,this)">Celtic<br><small>Cross</small></button>
+      </div>
+      <button class="btn btn-primary" onclick="drawSpread()">✦ Draw Reading</button>
+      <div id="spread-result" style="margin-top:14px"></div>
+    </div>`;
+}
+
+function revealTarot() {
+  if (tarotRevealed) return;
+  tarotRevealed = true;
+  const c = currentTarotCard;
+  document.getElementById('tarot-back-face').style.display = 'none';
+  document.getElementById('tarot-front-face').style.display = 'block';
+  document.getElementById('t-emoji').textContent = c.emoji;
+  document.getElementById('t-name').textContent = c.name;
+  document.getElementById('t-num').textContent = c.num + ' · ' + c.suit;
+  document.getElementById('t-keywords').innerHTML = (c.keywords||[]).map(k=>`<span class="tag">${k}</span>`).join('');
+  document.getElementById('t-meaning').textContent = c.meaning;
+  document.getElementById('t-reversed').textContent = '↑ Reversed: ' + c.reversed;
+  document.getElementById('tarot-btns').style.display = 'grid';
+}
+
+function newTarotCard() {
+  currentTarotCard = TAROT_DECK[Math.floor(Math.random()*TAROT_DECK.length)];
+  tarotRevealed = false;
+  document.getElementById('tarot-back-face').style.display = 'block';
+  document.getElementById('tarot-front-face').style.display = 'none';
+  document.getElementById('tarot-btns').style.display = 'none';
+}
+
+function copyTarotCard() {
+  const c = currentTarotCard;
+  copyText(`✦ Daily Tarot — ${new Date().toLocaleDateString()}\n\n${c.emoji} ${c.name} (${c.num} · ${c.suit})\n\n${c.meaning}\n\nReversed: ${c.reversed}\n\nKeywords: ${(c.keywords||[]).join(', ')}\n\n— Cosmic Whispers`);
+}
+
+function setSpread(n, btn) {
+  currentSpread = n;
+  document.querySelectorAll('#tool-tarot .toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function drawSpread() {
+  const deck = [...TAROT_DECK].sort(() => Math.random()-.5);
+  const cards = deck.slice(0, currentSpread);
+  const labels = currentSpread===1?['Your Card']:currentSpread===3?['Past','Present','Future']:['The Situation','The Cross','The Foundation','Recent Past','Best Outcome'];
+  document.getElementById('spread-result').innerHTML = cards.map((c,i) => `
+    <div class="rune-draw-card">
+      <div style="font-size:10px;color:var(--dust);font-family:'Raleway',sans-serif;margin-bottom:6px">${labels[i]||'Position '+(i+1)}</div>
+      <div style="font-size:40px;margin-bottom:6px">${c.emoji}</div>
+      <div style="font-family:'Cinzel Decorative',serif;font-size:13px;color:var(--gold);margin-bottom:4px">${c.name}</div>
+      <div style="font-size:13px;color:var(--moon);margin-bottom:4px">${c.meaning}</div>
+    </div>`).join('') + `<button class="btn btn-teal" onclick="copySpread()" style="margin-top:4px">📋 Copy Reading to OneNote</button>`;
+  window._lastSpread = {cards,labels};
+}
+
+function copySpread() {
+  const {cards,labels} = window._lastSpread||{cards:[],labels:[]};
+  copyText(`✦ Tarot Reading — ${new Date().toLocaleDateString()}\n\n`+cards.map((c,i)=>`${labels[i]||'Card '+(i+1)}: ${c.emoji} ${c.name}\n${c.meaning}`).join('\n\n')+'\n\n— Cosmic Whispers');
+}
+
+// NUMEROLOGY INIT
+function initNumerology() {
+  document.getElementById('tool-numerology').innerHTML = `
+    <div class="card">
+      <div class="card-title">🔢 Numerology Calculator</div>
+      <div class="field-group">
+        <label class="field-label">Full Birth Name (as given at birth)</label>
+        <input class="field-input" id="num-name" type="text" placeholder="e.g. Mary Elizabeth Jones">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Date of Birth</label>
+        <input class="field-input" id="num-dob" type="date">
+      </div>
+      <button class="btn btn-primary" onclick="calcNumerology()">✨ Reveal My Numbers</button>
+      <div id="num-results" style="margin-top:16px"></div>
+    </div>`;
+}
+
+function calcNumerology() {
+  const name = document.getElementById('num-name').value.trim();
+  const dob = document.getElementById('num-dob').value;
+  if (!name && !dob) { showToast('Enter your name and birth date first'); return; }
+  const results = [];
+  if (dob) {
+    const lp = getLifePath(dob); const m = NUM_MEANINGS[lp];
+    if (m) results.push({label:'Life Path Number',num:lp,data:m,icon:'🌟'});
+  }
+  if (name) {
+    const en = getExpressionNumber(name); const em = NUM_MEANINGS[en];
+    if (em) results.push({label:'Expression Number',num:en,data:em,icon:'✨'});
+    const su = getSoulUrge(name); const sm = NUM_MEANINGS[su];
+    if (sm) results.push({label:"Soul's Urge (Heart's Desire)",num:su,data:sm,icon:'💗'});
+  }
+  const el = document.getElementById('num-results');
+  el.innerHTML = results.map(r => `
+    <div class="num-result">
+      <div style="font-size:11px;color:var(--dust);font-family:'Raleway',sans-serif;text-align:center;letter-spacing:1px;margin-bottom:4px">${r.icon} ${r.label.toUpperCase()}</div>
+      <div class="num-number">${r.num}</div>
+      <div class="num-name">${r.data.symbol} ${r.data.name}</div>
+      <div style="font-size:14px;color:var(--moon);line-height:1.7;margin-bottom:10px">${r.data.meaning}</div>
+      <div class="data-row"><span class="data-label">✅ Positive</span><span class="data-val" style="color:var(--sage)">${r.data.positive}</span></div>
+      <div class="data-row"><span class="data-label">⚠️ Shadow</span><span class="data-val" style="color:var(--ember)">${r.data.negative}</span></div>
+      <div class="data-row"><span class="data-label">🔮 Archetype</span><span class="data-val">${r.data.archetype}</span></div>
+      <div class="data-row"><span class="data-label">💎 Crystals</span><span class="data-val">${r.data.crystals.join(', ')}</span></div>
+    </div>`).join('') + (results.length ? `<button class="btn btn-teal" onclick="copyNumerology()">📋 Copy to OneNote</button>` : '');
+  window._lastNums = {name, dob, results};
+}
+
+function copyNumerology() {
+  const {name,dob,results} = window._lastNums||{};
+  copyText(`✦ Numerology Reading\nName: ${name}\nBirth Date: ${dob}\n\n`+results.map(r=>`${r.icon} ${r.label}: ${r.num} — ${r.data.name}\n${r.data.meaning}\nPositive: ${r.data.positive}\nShadow: ${r.data.negative}`).join('\n\n')+'\n\n— Cosmic Whispers');
+}
+
+// RUNES INIT
+function initRunes() {
+  document.getElementById('tool-runes').innerHTML = `
+    <div class="card">
+      <div class="card-title">᚛ Rune Reading</div>
+      <div style="font-size:20px;color:var(--teal);letter-spacing:6px;text-align:center;margin-bottom:16px">ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
+        <button class="toggle-btn active" onclick="setRSpread(1,this)">1 Rune<br><small>Focus</small></button>
+        <button class="toggle-btn" onclick="setRSpread(3,this)">3 Runes<br><small>P/P/F</small></button>
+        <button class="toggle-btn" onclick="setRSpread(5,this)">5 Runes<br><small>Cross</small></button>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Your Question (optional)</label>
+        <input class="field-input" id="rune-question" type="text" placeholder="What guidance do you seek?">
+      </div>
+      <button class="btn btn-primary" onclick="drawRunes()">✦ Cast the Runes</button>
+      <div id="rune-result" style="margin-top:14px"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📖 Elder Futhark Reference</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">${RUNES_DATA.map((r,i)=>`<div style="background:rgba(30,50,30,.4);border:1px solid rgba(61,188,184,.15);border-radius:8px;padding:8px;text-align:center;cursor:pointer" onclick="showRuneInfo(${i})"><div style="font-size:24px;color:var(--teal)">${r.char}</div><div style="font-size:10px;color:var(--dust);font-family:'Raleway',sans-serif">${r.name}</div></div>`).join('')}</div>
+    </div>`;
+}
+
+let rSpread = 1;
+function setRSpread(n, btn) {
+  rSpread = n;
+  document.querySelectorAll('#tool-runes .toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function drawRunes() {
+  const q = document.getElementById('rune-question').value;
+  const drawn = [...RUNES_DATA].sort(()=>Math.random()-.5).slice(0, rSpread);
+  const labels = rSpread===1?['Your Guidance']:rSpread===3?['Past','Present','Future']:['Challenge','Crossing','Foundation','Recent Past','Outcome'];
+  document.getElementById('rune-result').innerHTML = (q?`<div style="font-size:13px;color:var(--dust);margin-bottom:12px;font-style:italic">Question: "${q}"</div>`:'') +
+    drawn.map((r,i) => `<div class="rune-draw-card">
+      <div style="font-size:10px;color:var(--dust);font-family:'Raleway',sans-serif;margin-bottom:4px">${labels[i]}</div>
+      <div style="font-size:48px;color:var(--teal);margin-bottom:6px">${r.char}</div>
+      <div style="font-family:'Cinzel Decorative',serif;font-size:14px;color:var(--silver);margin-bottom:4px">${r.name}</div>
+      <div style="font-size:13px;color:var(--moon);margin-bottom:6px">${r.divination}</div>
+      <div style="font-size:12px;color:var(--dust)">${r.meaning}</div>
+    </div>`).join('') + `<button class="btn btn-teal" onclick="copyRunes('${encodeURIComponent(JSON.stringify({drawn,labels,q}))}')">📋 Copy Reading to OneNote</button>`;
+}
+
+function copyRunes(encoded) {
+  const {drawn,labels,q} = JSON.parse(decodeURIComponent(encoded));
+  copyText(`✦ Rune Reading — ${new Date().toLocaleDateString()}${q?'\nQuestion: '+q:''}\n\n`+drawn.map((r,i)=>`${labels[i]}: ${r.char} ${r.name}\n${r.divination}\n${r.meaning}`).join('\n\n')+'\n\n— Cosmic Whispers');
+}
+
+function showRuneInfo(i) {
+  const r = RUNES_DATA[i];
+  openModal(`
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div style="font-size:64px;color:var(--teal);text-align:center;margin-bottom:8px">${r.char}</div>
+    <div class="modal-title" style="text-align:center">${r.name}</div>
+    <div style="font-size:15px;color:var(--moon);line-height:1.7;margin:12px 0">${r.meaning}</div>
+    <div class="modal-section"><h4>Divination Upright</h4><p style="color:var(--sage)">${r.divination}</p></div>
+    ${r.reversed?`<div class="modal-section"><h4>Divination Reversed</h4><p style="color:var(--ember)">${r.reversed}</p></div>`:''}
+    <button class="btn btn-teal" onclick="copyText('✦ ${r.name} (${r.char})\\n\\n${r.meaning}\\n\\nUpright: ${r.divination}\\n\\n— Cosmic Whispers')">📋 Copy to OneNote</button>
+  `);
+}
+
+// BIRTH CHART INIT
+function initBirthChart() {
+  document.getElementById('tool-birthchart').innerHTML = `
+    <div class="card">
+      <div class="card-title">🌙 Birth Chart</div>
+      <div style="font-size:15px;color:var(--moon);line-height:1.7;margin-bottom:14px">Calculate your natal chart — the cosmic snapshot of the sky at your exact moment of birth. Your Sun, Moon, Rising, and all planetary placements.</div>
+      <div class="field-group">
+        <label class="field-label">Date of Birth</label>
+        <input class="field-input" id="bc-date" type="date">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Time of Birth (as exact as possible)</label>
+        <input class="field-input" id="bc-time" type="time">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Place of Birth (city)</label>
+        <input class="field-input" id="bc-place" type="text" placeholder="e.g. London, England">
+      </div>
+      <button class="btn btn-primary" onclick="calcBirthChart()">🌟 Calculate Birth Chart</button>
+      <div id="bc-result" style="margin-top:14px"></div>
+    </div>
+    <div class="card">
+      <div style="font-size:13px;color:var(--dust)">For a full professional chart with house cusps and aspects, these free services are highly recommended:</div>
+      <a href="https://astro.com/astro-databank/Main_Page" target="_blank" class="zone-link" style="margin-top:10px;display:block;background:rgba(30,16,56,.5);border:1px solid rgba(196,168,232,.08);border-radius:10px;padding:12px;text-decoration:none;color:var(--moon)">🌟 Astro.com Free Chart Service<span style="font-size:11px;color:var(--dust);display:block">Most accurate free natal chart online</span></a>
+      <a href="https://cafeastrology.com/freebirthchart.html" target="_blank" class="zone-link" style="margin-top:8px;display:block;background:rgba(30,16,56,.5);border:1px solid rgba(196,168,232,.08);border-radius:10px;padding:12px;text-decoration:none;color:var(--moon)">🔮 Cafe Astrology Free Chart<span style="font-size:11px;color:var(--dust);display:block">Detailed interpretations included</span></a>
+    </div>`;
+}
+
+function calcBirthChart() {
+  const date = document.getElementById('bc-date').value;
+  const time = document.getElementById('bc-time').value || '12:00';
+  if (!date) { showToast('Enter your birth date first'); return; }
+  const dt = new Date(date + 'T' + time);
+  const signs2 = computeSigns(dt);
+  const sun = signs2.Sun, moon2 = signs2.Moon, merc = signs2.Mercury, ven = signs2.Venus, mars = signs2.Mars, jup = signs2.Jupiter, sat = signs2.Saturn;
+  document.getElementById('bc-result').innerHTML = `
+    <div style="background:rgba(30,16,56,.6);border-radius:12px;padding:14px;margin-bottom:10px">
+      <div style="font-family:'Cinzel Decorative',serif;font-size:12px;color:var(--silver);margin-bottom:12px">Your Planetary Positions at Birth</div>
+      ${[['☉ Sun',sun],['☽ Moon',moon2],['☿ Mercury',merc],['♀ Venus',ven],['♂ Mars',mars],['♃ Jupiter',jup],['♄ Saturn',sat]].filter(([,s])=>s).map(([g,s])=>`
+      <div class="data-row"><span class="data-label">${g}</span><span class="data-val">${s.glyph} ${s.name} ${s.deg}°${s.retro?' ℞':''}</span></div>`).join('')}
+      <div style="font-size:12px;color:var(--dust);margin-top:10px;font-style:italic">⚠️ Rising sign requires exact birth time and place. Use Astro.com for full accuracy.</div>
+    </div>
+    <button class="btn btn-teal" onclick="copyBirthChart()">📋 Copy to OneNote</button>`;
+  window._lastBC = {date, time, signs2};
+}
+
+function copyBirthChart() {
+  const {date,time,signs2} = window._lastBC||{};
+  const lines = PLANETS.map(p => signs2[p.name] ? `${p.glyph} ${p.name}: ${signs2[p.name].glyph} ${signs2[p.name].name} ${signs2[p.name].deg}°${signs2[p.name].retro?' ℞':''}` : '').filter(Boolean);
+  copyText(`✦ Birth Chart\nDate: ${date} · Time: ${time}\n\n${lines.join('\n')}\n\n— Cosmic Whispers`);
+}
+
+function init() {
+  const cache = loadCache(); let signs, moon;
+  if (!cacheStale(cache)) { signs = cache.d.signs; moon = cache.d.moon; }
+  else { const now = new Date(); signs = computeSigns(now); moon = getMoonPhase(now); saveCache({signs,moon}); }
+  renderHUD(signs, moon);
+  initTarot();
+  initNumerology();
+  initRunes();
+  initBirthChart();
+  // Check anchor
+  const hash = window.location.hash.replace('#','');
+  if (['numerology','runes','birthchart','tarot'].includes(hash)) {
+    const btn = document.querySelector(`[onclick*="${hash}"]`);
+    if (btn) showTool(hash, btn);
+  }
+}
+function waitForAstronomy(cb,tries=0){if(typeof Astronomy!=="undefined"){cb();return;}if(tries>20){cb();return;}setTimeout(()=>waitForAstronomy(cb,tries+1),500);}
+waitForAstronomy(()=>init());
+</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");</script>
+</body>
+</html>

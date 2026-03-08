@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#08030f">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Cosmic Whispers · Book of Shadows</title>
+<style>
+/* ── COSMIC WHISPERS · shared.css ── */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&family=Raleway:wght@300;400;500;600&display=swap');
+
+:root {
+  --ink:#08030f; --deep:#0f0620; --void:#160b2a; --veil:#1e1038;
+  --mist:#271448; --dust:#8b6bb1; --silver:#c4a8e8; --moon:#e8daf5;
+  --star:#f5f0ff; --gold:#d4a843; --ember:#c4621a; --rose:#c4507a;
+  --teal:#3dbcb8; --sage:#7ab87a; --red:#e06060; --blue:#6080e8;
+  --r:16px; --glow:0 0 30px rgba(196,168,232,.15);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--moon);font-family:'Crimson Pro',Georgia,serif;
+  font-size:17px;min-height:100vh;overflow-x:hidden;padding-bottom:80px}
+
+/* STARFIELD */
+#starfield{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse at 25% 20%,#1a0f3a 0%,#08030f 65%)}
+.star{position:absolute;background:#fff;border-radius:50%;
+  animation:twinkle var(--dur,3s) var(--delay,0s) infinite ease-in-out}
+@keyframes twinkle{0%,100%{opacity:var(--lo,.2);transform:scale(1)}50%{opacity:var(--hi,.9);transform:scale(1.4)}}
+.nebula{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;
+  animation:drift 22s ease-in-out infinite alternate}
+.nb1{width:420px;height:320px;background:rgba(100,40,180,.1);top:-60px;right:-100px}
+.nb2{width:360px;height:360px;background:rgba(40,80,200,.07);bottom:80px;left:-80px;animation-delay:-11s}
+.nb3{width:280px;height:220px;background:rgba(180,50,120,.06);top:45%;right:15%;animation-delay:-5s}
+@keyframes drift{0%{transform:translate(0,0) rotate(0deg)}100%{transform:translate(25px,18px) rotate(12deg)}}
+
+/* LAYOUT */
+#app{position:relative;z-index:1;min-height:100vh;max-width:640px;margin:0 auto}
+
+/* HUD BAR */
+#hud{position:sticky;top:0;z-index:100;display:flex;align-items:center;
+  background:rgba(8,3,15,.88);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(196,168,232,.1);
+  padding:8px 4px;gap:2px;overflow-x:auto;scrollbar-width:none}
+#hud::-webkit-scrollbar{display:none}
+.hud-item{flex:1;min-width:52px;text-align:center;padding:4px 2px}
+.hud-label{font-family:'Raleway',sans-serif;font-size:9px;color:var(--dust);
+  letter-spacing:1px;text-transform:uppercase;margin-bottom:2px}
+.hud-val{font-family:'Raleway',sans-serif;font-size:11px;color:var(--moon);font-weight:500;white-space:nowrap}
+.sun-val{color:var(--gold)}
+.retro-val{color:var(--rose)}
+
+/* NAV */
+#nav{position:fixed;bottom:0;left:0;right:0;z-index:100;
+  background:rgba(8,3,15,.95);backdrop-filter:blur(20px);
+  border-top:1px solid rgba(196,168,232,.1);
+  display:flex;align-items:center;justify-content:space-around;
+  padding:6px 0 max(6px,env(safe-area-inset-bottom))}
+.nav-btn{background:none;border:none;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:5px 8px;border-radius:10px;color:var(--dust);
+  font-family:'Raleway',sans-serif;font-size:9px;letter-spacing:.5px;
+  min-width:42px;transition:color .2s;text-decoration:none}
+.nav-btn.active{color:var(--silver)}
+.nav-btn.active .ni{filter:drop-shadow(0 0 5px rgba(196,168,232,.5))}
+.ni{font-size:18px;transition:transform .2s;display:block}
+.nav-btn:active .ni{transform:scale(.85)}
+
+/* CARDS */
+.card{background:rgba(22,11,42,.72);border:1px solid rgba(196,168,232,.1);
+  border-radius:var(--r);padding:18px;margin-bottom:14px;
+  backdrop-filter:blur(10px);box-shadow:var(--glow)}
+.card-title{font-family:'Cinzel Decorative',serif;font-size:11px;letter-spacing:3px;
+  color:var(--dust);text-transform:uppercase;margin-bottom:14px;
+  display:flex;align-items:center;gap:8px}
+.card-title::after{content:'';flex:1;height:1px;
+  background:linear-gradient(to right,rgba(196,168,232,.2),transparent)}
+
+/* PAGE HEADER */
+.page-wrap{padding:16px}
+.page-title{font-family:'Cinzel Decorative',serif;font-size:20px;
+  color:var(--silver);text-align:center;margin-bottom:4px;
+  text-shadow:0 0 30px rgba(196,168,232,.4)}
+.page-sub{font-size:13px;color:var(--dust);text-align:center;
+  font-style:italic;margin-bottom:20px}
+
+/* BUTTONS */
+.btn{border:none;border-radius:12px;cursor:pointer;
+  font-family:'Raleway',sans-serif;letter-spacing:1.5px;
+  text-transform:uppercase;transition:all .2s;width:100%;padding:12px}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,rgba(100,50,180,.45),rgba(60,80,200,.35));
+  border:1px solid rgba(196,168,232,.25);color:var(--moon);font-size:13px}
+.btn-teal{background:rgba(61,188,184,.15);border:1px solid rgba(61,188,184,.3);
+  color:var(--teal);font-size:12px;margin-top:10px}
+.btn-gold{background:rgba(212,168,67,.15);border:1px solid rgba(212,168,67,.3);
+  color:var(--gold);font-size:12px;margin-top:10px}
+
+/* INPUTS */
+.field-label{font-family:'Raleway',sans-serif;font-size:11px;color:var(--dust);
+  letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;display:block}
+.field-input{width:100%;background:rgba(30,16,56,.8);
+  border:1px solid rgba(196,168,232,.15);border-radius:10px;
+  color:var(--moon);font-family:'Crimson Pro',serif;font-size:16px;
+  padding:10px 14px;outline:none;transition:border-color .2s}
+.field-input:focus{border-color:rgba(196,168,232,.4)}
+textarea.field-input{min-height:110px;resize:vertical}
+.field-group{margin-bottom:12px}
+
+/* TAGS */
+.tag{background:rgba(196,168,232,.1);border:1px solid rgba(196,168,232,.15);
+  border-radius:20px;padding:4px 12px;
+  font-family:'Raleway',sans-serif;font-size:12px;color:var(--silver);display:inline-block}
+.tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+
+/* TOGGLE */
+.toggle-row{display:flex;background:rgba(30,16,56,.7);
+  border:1px solid rgba(196,168,232,.1);border-radius:10px;
+  overflow:hidden;margin-bottom:16px}
+.toggle-btn{flex:1;background:none;border:none;cursor:pointer;
+  padding:9px 6px;font-family:'Raleway',sans-serif;font-size:11px;
+  color:var(--dust);transition:all .2s;letter-spacing:.5px}
+.toggle-btn.active{background:rgba(196,168,232,.14);color:var(--silver)}
+
+/* MODAL */
+#modal-overlay{display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(4,1,10,.88);backdrop-filter:blur(8px);
+  align-items:flex-end;justify-content:center}
+#modal-overlay.open{display:flex;animation:fadeIn .2s ease}
+#modal-box{background:var(--void);border:1px solid rgba(196,168,232,.15);
+  border-radius:24px 24px 0 0;padding:24px 20px max(24px,env(safe-area-inset-bottom));
+  width:100%;max-width:640px;max-height:88vh;overflow-y:auto;
+  animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal-close{float:right;background:rgba(196,168,232,.1);border:none;
+  color:var(--dust);font-size:18px;border-radius:50%;
+  width:30px;height:30px;cursor:pointer;line-height:30px;text-align:center}
+.modal-title{font-family:'Cinzel Decorative',serif;font-size:16px;color:var(--silver);margin-bottom:3px}
+.modal-sub{font-size:13px;color:var(--dust);margin-bottom:18px}
+.modal-section{margin-bottom:14px}
+.modal-section h4{font-family:'Raleway',sans-serif;font-size:10px;
+  letter-spacing:2px;color:var(--dust);text-transform:uppercase;margin-bottom:5px}
+
+/* RESULT ROWS */
+.result-row{display:flex;justify-content:space-between;align-items:center;
+  padding:8px 0;border-bottom:1px solid rgba(196,168,232,.06)}
+.result-label{color:var(--dust);font-size:14px}
+.result-val{color:var(--moon);font-size:14px;text-align:right;max-width:60%}
+
+/* DIVIDER */
+.divider{height:1px;background:linear-gradient(to right,transparent,rgba(196,168,232,.15),transparent);margin:14px 0}
+
+/* TOAST */
+#toast{position:fixed;bottom:95px;left:50%;transform:translateX(-50%) translateY(16px);
+  background:rgba(61,188,184,.92);color:#fff;border-radius:20px;
+  padding:10px 24px;font-family:'Raleway',sans-serif;font-size:13px;
+  z-index:300;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:4px;border-radius:20px;
+  padding:3px 10px;font-family:'Raleway',sans-serif;font-size:10px;letter-spacing:.5px}
+.badge-retro{background:rgba(196,100,80,.15);border:1px solid rgba(196,100,80,.3);color:var(--ember)}
+.badge-teal{background:rgba(61,188,184,.12);border:1px solid rgba(61,188,184,.25);color:var(--teal)}
+.badge-gold{background:rgba(212,168,67,.12);border:1px solid rgba(212,168,67,.25);color:var(--gold)}
+.badge-green{background:rgba(122,184,122,.12);border:1px solid rgba(122,184,122,.25);color:var(--sage)}
+
+/* LOADING */
+.loading{color:var(--dust);font-style:italic;text-align:center;padding:24px;font-size:15px}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(196,168,232,.2);border-radius:2px}
+
+</style>
+<script src="https://unpkg.com/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
+</head>
+<body data-page="shadows">
+<div id="starfield"></div><div class="nebula nb1"></div><div class="nebula nb2"></div>
+<div id="app">
+  <div id="hud"></div>
+  <div class="page-wrap">
+    <div class="page-title">📖 Book of Shadows</div>
+    <div class="page-sub">Your sacred grimoire — spells, herbs, dreams & rituals</div>
+
+    <div class="toggle-row" style="overflow-x:auto;flex-wrap:nowrap" id="shadows-tabs">
+      <button class="toggle-btn active" onclick="setTab('spells',this)" style="white-space:nowrap">✨ Spells</button>
+      <button class="toggle-btn" onclick="setTab('herbs',this)" style="white-space:nowrap">🌿 Herbs</button>
+      <button class="toggle-btn" onclick="setTab('crystals',this)" style="white-space:nowrap">💎 Crystals</button>
+      <button class="toggle-btn" onclick="setTab('dreams',this)" style="white-space:nowrap">🌙 Dreams</button>
+      <button class="toggle-btn" onclick="setTab('rituals',this)" style="white-space:nowrap">✦ Rituals</button>
+    </div>
+
+    <div id="tab-spells"></div>
+    <div id="tab-herbs" style="display:none"></div>
+    <div id="tab-crystals" style="display:none"></div>
+    <div id="tab-dreams" style="display:none"></div>
+    <div id="tab-rituals" style="display:none"></div>
+  </div>
+</div>
+<div id="nav-mount"></div>
+
+<style>
+.spell-category-btn{background:rgba(30,16,56,.6);border:1px solid rgba(196,168,232,.12);border-radius:12px;padding:14px;cursor:pointer;transition:all .2s;text-align:center;color:var(--moon);font-family:'Raleway',sans-serif;font-size:12px;letter-spacing:.5px}
+.spell-category-btn:active{transform:scale(.95)}
+.spell-category-btn.active-cat{border-color:rgba(196,168,232,.4);background:rgba(80,40,180,.2)}
+.herb-card,.crystal-card{background:rgba(22,11,42,.72);border:1px solid rgba(196,168,232,.08);border-radius:12px;padding:14px;margin-bottom:8px;cursor:pointer}
+.herb-card:active,.crystal-card:active{border-color:rgba(196,168,232,.3)}
+</style>
+
+<script>
+// ── COSMIC WHISPERS · shared.js ──
+
+const SUPA_URL = 'https://jzitxcubechrxochtztm.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6aXR4Y3ViZWNocnhvY2h0enRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4OTIwMjAsImV4cCI6MjA4ODQ2ODAyMH0.EiQrFfb-8AF9Jjc1AfI4txYxHf-XzazHF-XY7N4uLEk';
+
+async function dbInsert(table, row) {
+  try {
+    const r = await fetch(`${SUPA_URL}/rest/v1/${table}`, {
+      method:'POST', headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'Prefer':'return=minimal'},
+      body: JSON.stringify(row)
+    });
+    return r.ok;
+  } catch(e) { return false; }
+}
+async function dbSelect(table, limit=50) {
+  try {
+    const r = await fetch(`${SUPA_URL}/rest/v1/${table}?order=created_at.desc&limit=${limit}`, {
+      headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`}
+    });
+    return r.ok ? await r.json() : [];
+  } catch(e) { return []; }
+}
+
+function getTesterName() {
+  let n = localStorage.getItem('cw_tester');
+  if (!n) { n = prompt('Welcome to Cosmic Whispers Beta!\nEnter your name:') || 'Seeker'; localStorage.setItem('cw_tester', n); }
+  return n;
+}
+
+function initStarfield() {
+  const sf = document.getElementById('starfield'); if (!sf) return;
+  for (let i=0;i<160;i++) {
+    const s=document.createElement('div'); s.className='star';
+    const sz=Math.random()*2.5+0.4;
+    s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--lo:${(Math.random()*.3+.05).toFixed(2)};--hi:${(Math.random()*.6+.4).toFixed(2)};--dur:${(Math.random()*4+2).toFixed(1)}s;--delay:-${(Math.random()*6).toFixed(1)}s`;
+    sf.appendChild(s);
+  }
+}
+
+const SIGNS=[{name:'Aries',glyph:'♈'},{name:'Taurus',glyph:'♉'},{name:'Gemini',glyph:'♊'},{name:'Cancer',glyph:'♋'},{name:'Leo',glyph:'♌'},{name:'Virgo',glyph:'♍'},{name:'Libra',glyph:'♎'},{name:'Scorpio',glyph:'♏'},{name:'Sagittarius',glyph:'♐'},{name:'Capricorn',glyph:'♑'},{name:'Aquarius',glyph:'♒'},{name:'Pisces',glyph:'♓'}];
+
+function lonToSign(lon){const n=((lon%360)+360)%360,i=Math.floor(n/30);return{...SIGNS[i],deg:(n-i*30).toFixed(1),idx:i};}
+
+// Safe astronomy wrappers - never crash, always return something
+function getSunLon(d){
+  try{ if(typeof Astronomy==='undefined') return estimateSunLon(d); return Astronomy.SunPosition(d).elon; }
+  catch(e){ return estimateSunLon(d); }
+}
+function estimateSunLon(d) {
+  // Rough Sun longitude estimate based on day of year
+  const start = new Date(d.getFullYear(), 0, 0);
+  const diff = d - start;
+  const dayOfYear = Math.floor(diff / 86400000);
+  return ((dayOfYear - 80) / 365.25) * 360;
+}
+function getMoonLon(d){
+  try{
+    if(typeof Astronomy==='undefined') return estimateMoonLon(d);
+    const eq=Astronomy.Equator('Moon',d,null,false,true),ec=Astronomy.Ecliptic(eq.vec);
+    return((ec.elon%360)+360)%360;
+  }catch(e){ return estimateMoonLon(d); }
+}
+function estimateMoonLon(d) {
+  // Rough Moon longitude estimate
+  const knownNew = new Date('2024-01-11').getTime();
+  const synodicMs = 29.53059 * 86400000;
+  const elapsed = d.getTime() - knownNew;
+  const phase = ((elapsed % synodicMs) + synodicMs) % synodicMs;
+  return (phase / synodicMs) * 360;
+}
+function getPlanetLon(body,d){
+  try{
+    if(typeof Astronomy==='undefined') return null;
+    const eq=Astronomy.Equator(body,d,null,false,true),ec=Astronomy.Ecliptic(eq.vec);
+    return((ec.elon%360)+360)%360;
+  }catch(e){ return null; }
+}
+function isRetro(body,date){
+  if(body==='Sun'||body==='Moon')return false;
+  try{
+    if(typeof Astronomy==='undefined') return false;
+    const l1=getPlanetLon(body,new Date(date-86400000)),l2=getPlanetLon(body,new Date(date+86400000));
+    if(l1===null||l2===null)return false;
+    let d=l2-l1;if(d>180)d-=360;if(d<-180)d+=360;return d<0;
+  }catch(e){return false;}
+}
+function getMoonPhase(d){
+  try{
+    if(typeof Astronomy==='undefined') return estimateMoonPhase(d);
+    const a=Astronomy.MoonPhase(d),il=Math.round((1-Math.cos(a*Math.PI/180))/2*100);
+    const p=[[22.5,'New Moon','🌑'],[67.5,'Waxing Crescent','🌒'],[112.5,'First Quarter','🌓'],[157.5,'Waxing Gibbous','🌔'],[202.5,'Full Moon','🌕'],[247.5,'Waning Gibbous','🌖'],[292.5,'Last Quarter','🌗'],[337.5,'Waning Crescent','🌘']];
+    for(const[t,n,i]of p)if(a<t)return{name:n,icon:i,illum:il,angle:a};
+    return{name:'New Moon',icon:'🌑',illum:il,angle:a};
+  }catch(e){ return estimateMoonPhase(d); }
+}
+function estimateMoonPhase(d) {
+  const lon = estimateMoonLon(d);
+  const sunLon = estimateSunLon(d);
+  const angle = ((lon - sunLon) + 360) % 360;
+  const il = Math.round((1-Math.cos(angle*Math.PI/180))/2*100);
+  const p=[[22.5,'New Moon','🌑'],[67.5,'Waxing Crescent','🌒'],[112.5,'First Quarter','🌓'],[157.5,'Waxing Gibbous','🌔'],[202.5,'Full Moon','🌕'],[247.5,'Waning Gibbous','🌖'],[292.5,'Last Quarter','🌗'],[337.5,'Waning Crescent','🌘']];
+  for(const[t,n,i]of p)if(angle<t)return{name:n,icon:i,illum:il,angle};
+  return{name:'New Moon',icon:'🌑',illum:il,angle};
+}
+
+// Sun/Moon rise/set with fallback
+function getSunTimes(date, lat, lon) {
+  try {
+    if(typeof Astronomy==='undefined'||!lat||!lon) return {rise:'6:30 AM',set:'6:30 PM',daylight:'12.0h'};
+    const obs=new Astronomy.Observer(lat,lon,0);
+    const fmt=d=>d?new Date(d.date).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'—';
+    const sr=Astronomy.SearchRiseSet('Sun',obs,+1,date,1);
+    const ss=Astronomy.SearchRiseSet('Sun',obs,-1,date,1);
+    const hrs=sr&&ss?((new Date(ss.date)-new Date(sr.date))/3600000).toFixed(1)+'h':'12h';
+    return{rise:fmt(sr),set:fmt(ss),daylight:hrs};
+  }catch(e){return{rise:'6:30 AM',set:'6:30 PM',daylight:'12.0h'};}
+}
+function getMoonTimes(date, lat, lon) {
+  try {
+    if(typeof Astronomy==='undefined'||!lat||!lon) return {rise:'—',set:'—'};
+    const obs=new Astronomy.Observer(lat,lon,0);
+    const fmt=d=>d?new Date(d.date).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'—';
+    return{rise:fmt(Astronomy.SearchRiseSet('Moon',obs,+1,date,1)),set:fmt(Astronomy.SearchRiseSet('Moon',obs,-1,date,1))};
+  }catch(e){return{rise:'—',set:'—'};}
+}
+
+const PLANETS=[
+  {name:'Sun',glyph:'☉',body:'Sun',color:'#f5c842',emoji:'🌞',au:0},
+  {name:'Moon',glyph:'☽',body:'Moon',color:'#e8daf5',emoji:'🌙',au:.00257},
+  {name:'Mercury',glyph:'☿',body:'Mercury',color:'#a8c4e0',emoji:'⚡',au:.387},
+  {name:'Venus',glyph:'♀',body:'Venus',color:'#f5c084',emoji:'💛',au:.723},
+  {name:'Mars',glyph:'♂',body:'Mars',color:'#e06060',emoji:'🔴',au:1.524},
+  {name:'Jupiter',glyph:'♃',body:'Jupiter',color:'#f0a840',emoji:'🟠',au:5.203},
+  {name:'Saturn',glyph:'♄',body:'Saturn',color:'#c8b870',emoji:'🪐',au:9.537},
+  {name:'Uranus',glyph:'⛢',body:'Uranus',color:'#80e0e0',emoji:'🔵',au:19.19},
+  {name:'Neptune',glyph:'♆',body:'Neptune',color:'#6080e8',emoji:'🔮',au:30.07},
+  {name:'Pluto',glyph:'♇',body:'Pluto',color:'#8080a0',emoji:'⚫',au:39.48},
+];
+
+function computeSigns(date){
+  const s={};
+  for(const p of PLANETS){
+    let lon = p.body==='Sun' ? getSunLon(date)
+            : p.body==='Moon' ? getMoonLon(date)
+            : getPlanetLon(p.body,date);
+    // Use estimate for outer planets if Astronomy not ready
+    if(lon===null){
+      lon = estimateSunLon(date) + (p.au * 30); // rough placeholder
+    }
+    s[p.name]=lonToSign(lon);
+    s[p.name].retro=isRetro(p.body,date.getTime());
+  }
+  return s;
+}
+
+const DAY_RULERS=['Sun','Moon','Mars','Mercury','Jupiter','Venus','Saturn'];
+const DAY_GLYPHS={Sun:'☉',Moon:'☽',Mars:'♂',Mercury:'☿',Jupiter:'♃',Venus:'♀',Saturn:'♄'};
+const DAY_NAMES=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+const CACHE_KEY='cw_v5';
+function loadCache(){try{return JSON.parse(localStorage.getItem(CACHE_KEY));}catch(e){return null;}}
+function saveCache(d){try{localStorage.setItem(CACHE_KEY,JSON.stringify({ts:Date.now(),d}));}catch(e){}}
+function cacheStale(c){
+  if(!c||!c.d)return true;
+  if(Date.now()-c.ts>4*3600000)return true;
+  return false;
+}
+
+function renderHUD(signs,moon){
+  const el=document.getElementById('hud');if(!el)return;
+  const sun=signs?.Sun,ruler=DAY_RULERS[new Date().getDay()],
+        retros=signs?Object.values(signs).filter(s=>s.retro).length:0,now=new Date();
+  el.innerHTML=`
+    <div class="hud-item"><div class="hud-label">SUN</div><div class="hud-val sun-val">${sun?sun.glyph+' '+sun.name:'♈ Aries'}</div></div>
+    <div class="hud-item"><div class="hud-label">MOON</div><div class="hud-val">${moon?moon.icon+' '+moon.illum+'%':'🌙'}</div></div>
+    <div class="hud-item"><div class="hud-label">RULER</div><div class="hud-val">${DAY_GLYPHS[ruler]} ${ruler}</div></div>
+    <div class="hud-item"><div class="hud-label">℞</div><div class="hud-val retro-val">${retros>0?'● '+retros:'● 0'}</div></div>
+    <div class="hud-item"><div class="hud-label">TODAY</div><div class="hud-val">${now.toLocaleDateString([],{month:'short',day:'numeric'})}</div></div>
+    <div class="hud-item"><div class="hud-label">UPDATED</div><div class="hud-val">${now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div></div>`;
+}
+
+function showToast(msg){
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t);}
+  t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);
+}
+function copyText(text){
+  navigator.clipboard.writeText(text).then(()=>showToast('✦ Copied!')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showToast('✦ Copied!');
+  });
+}
+
+const NAV_ITEMS=[
+  {page:'index',icon:'🏠',label:'Home',href:'index.html'},
+  {page:'horoscope',icon:'♈',label:'Signs',href:'horoscope.html'},
+  {page:'retro',icon:'⚡',label:'Retro',href:'retro.html'},
+  {page:'shadows',icon:'📖',label:'Shadows',href:'shadows.html'},
+  {page:'journal',icon:'📝',label:'Journal',href:'journal.html'},
+  {page:'wheel',icon:'☸',label:'Wheel',href:'wheel.html'},
+  {page:'planets',icon:'🪐',label:'Planets',href:'planets.html'},
+  {page:'tools',icon:'🔭',label:'Tools',href:'tools.html'},
+];
+function injectNav(active){
+  const el=document.getElementById('nav-mount');if(!el)return;
+  el.innerHTML=`<nav id="nav">${NAV_ITEMS.map(n=>`<a class="nav-btn${n.page===active?' active':''}" href="${n.href}"><span class="ni">${n.icon}</span>${n.label}</a>`).join('')}</nav>`;
+}
+function openModal(html){
+  let ov=document.getElementById('modal-overlay');
+  if(!ov){ov=document.createElement('div');ov.id='modal-overlay';ov.innerHTML='<div id="modal-box"></div>';document.body.appendChild(ov);
+    ov.addEventListener('click',e=>{if(e.target===ov)closeModal();});}
+  document.getElementById('modal-box').innerHTML=html;
+  ov.classList.add('open');
+}
+function closeModal(){const ov=document.getElementById('modal-overlay');if(ov)ov.classList.remove('open');}
+
+// Wait for Astronomy library to load before computing
+function waitForAstronomy(cb, tries=0) {
+  if(typeof Astronomy !== 'undefined') { cb(); return; }
+  if(tries > 20) { cb(); return; } // give up after 2s, use estimates
+  setTimeout(() => waitForAstronomy(cb, tries+1), 100);
+}
+
+window.addEventListener('load',()=>{
+  initStarfield();
+  injectNav(document.body.dataset.page);
+});
+
+</script>
+<script>
+const SPELL_CATEGORIES = [
+  {id:'love',icon:'💕',name:'Love & Romance',color:'#e06080'},
+  {id:'prosperity',icon:'💰',name:'Prosperity',color:'#d4a843'},
+  {id:'protection',icon:'🛡️',name:'Protection',color:'#6080e8'},
+  {id:'courage',icon:'🔥',name:'Courage & Power',color:'#e06040'},
+  {id:'intuition',icon:'🔮',name:'Intuition',color:'#8060c0'},
+  {id:'manifestation',icon:'⭐',name:'Manifestation',color:'#40c0c0'},
+];
+
+const SPELLS = {
+  love:[
+    {name:'Rose Petal Attraction Spell',timing:'Friday · Venus hour · Waxing Moon',ingredients:['Red rose petals','Rose quartz crystal','Pink candle','Rose essential oil','Paper & red ink'],instructions:'Write the qualities you seek in a partner on red paper. Anoint a pink candle with rose oil. Surround the candle with rose petals and place the rose quartz at the base. Light the candle and read your paper aloud three times, visualizing the love you desire coming to you. Let the candle burn down safely. Keep the rose quartz as your love talisman.',warning:'Always specify qualities, never name a specific person — let the universe choose the best match for you.'},
+    {name:'Honey Jar Sweetening Spell',timing:'Friday · Full Moon preferred',ingredients:['Small jar with lid','Honey','Paper & pen','Personal taglock (optional)','Pink or red candle'],instructions:'Write your intention on paper — sweetening a relationship, drawing kindness, or attracting love. Fold the paper toward you. Place it in the jar. Cover with honey. Seal the jar and drip candle wax over the lid. Bury the jar or place on your altar. Every Friday, burn a candle on top of the jar to keep the magic alive.',warning:'Sweetening jars work slowly — give this at least a full lunar cycle.'},
+    {name:'Mirror Love Ritual',timing:'New Moon',ingredients:['Small mirror','Rose petals','Candle','Rose water spray'],instructions:'Spray rose water on the mirror. Scatter rose petals around it in a circle. Light the candle and gaze at your own reflection. Speak aloud: "I am worthy of love. Love flows to me freely and joyfully." Sit with this feeling for as long as feels right. This spell works on self-love first, which draws love to you.',warning:'This is a self-love and attraction working — approach with openness.'},
+  ],
+  prosperity:[
+    {name:'Green Candle Money Spell',timing:'Thursday · Jupiter hour · Waxing Moon',ingredients:['Green candle','Cinnamon oil','Bay leaves','Coins','Green thread'],instructions:'Anoint the green candle with cinnamon oil, working from base to tip (drawing energy toward you). Write your specific financial goal on a bay leaf. Wrap the base of the candle with green thread. Place coins in a circle around the candle. Light the candle and visualize money flowing into your life with ease. Burn the bay leaf in the candle flame when you feel the energy peak.',warning:'Be specific with amounts and timeframes. Vague intentions yield vague results.'},
+    {name:'Cinnamon Prosperity Blow',timing:'Any time — fast working',ingredients:['Ground cinnamon','Your front door'],instructions:'Open your front door. Stand in the doorway facing inward. Pour a small pile of ground cinnamon into your palm. Blow it powerfully into your home while saying "abundance, prosperity, wealth — enter my home and stay." Sweep up any that lands outside. Leave what lands inside for 24 hours, then sweep it into a corner of your home.',warning:'This is traditionally done on the first of each month for ongoing prosperity.'},
+    {name:'Abundance Altar Ritual',timing:'Full Moon',ingredients:['Gold or green cloth','Citrine crystal','Bay leaves','Coins','Basil','Green candle'],instructions:'Set up your abundance altar on a full moon. Place green or gold cloth as the base. Set a citrine crystal in the center. Arrange coins, bay leaves (write your wishes on them), and fresh basil around it. Light a green candle and spend time in meditation, feeling the feeling of already having what you desire. Leave the altar up for the full moon cycle.',warning:'Return to your altar daily to reinforce the energy with gratitude.'},
+  ],
+  protection:[
+    {name:'Black Salt Banishing Boundary',timing:'Saturday · Waning Moon',ingredients:['Black salt (sea salt + ash + black pepper)','Black candle','Sage or protective incense'],instructions:'Make black salt by combining sea salt, wood ash, and black pepper. Light your black candle and pass the black salt through its smoke. Walk the perimeter of your home (or room) counterclockwise, laying a thin line of black salt at each doorway and windowsill. As you lay each line say: "Nothing harmful may cross this threshold. I am protected." Repeat as needed or after cleansings.',warning:'Renew black salt barriers monthly or after heavy negative energy.'},
+    {name:'Mirror Protection Spell',timing:'Saturday · Dark Moon',ingredients:['Small mirror','Black ribbon','Protective herbs (rosemary, black salt)','Black candle'],instructions:'During the dark moon, bind a small mirror with black ribbon. Sprinkle protective herbs inside the ribbon wrapping. Light a black candle and hold the mirror. Speak: "This mirror reflects all harm back to its source, harming none on its return." Place the mirror facing outward above your door or in a window.',warning:'This returns energy to its sender — ensure your intention is defensive, not offensive.'},
+    {name:'Fiery Wall of Protection Oil',timing:'Any time',ingredients:['Olive oil base','Cinnamon','Black pepper','Dragon\'s blood resin','Frankincense','Red candle'],instructions:'Blend your oil ingredients in a small vial. Let it sit on your altar for 3 nights. Anoint yourself (wrists, throat, heart) or doorways when you feel you need protection. You can also anoint a red candle and burn it while visualizing a wall of protective fire surrounding you.',warning:'Test skin reactions before applying essential oils directly.'},
+  ],
+  courage:[
+    {name:'Solar Courage Flame',timing:'Sunday · Leo Moon · Waxing',ingredients:['Orange or gold candle','Cinnamon oil','Sunstone crystal','Bay laurel leaves'],instructions:'Anoint your candle with cinnamon oil from base to tip. Hold your sunstone and breathe deeply. Speak your fear aloud to the candle — name what you must face. Then speak your intended action. Light the candle. Write your courageous act on a bay leaf and burn it in the flame. Carry the sunstone with you as you take action.',warning:'Light this candle just before the courageous act you\'re preparing for.'},
+    {name:'Viking Courage Rune Rite',timing:'Tuesday · Mars hour',ingredients:['Red ink or paint','Paper or stone','Candle'],instructions:'Draw or carve the rune Tiwaz (↑) — the arrow pointing upward, symbol of Tyr the one-handed god who sacrificed himself for justice and courage. Light a candle and focus on the rune. Feel the energy of the warrior ancestor who stood firm when everything was at stake. Carry the rune or wear it during your challenge.',warning:'Tiwaz also brings justice — use this with honor in your heart.'},
+  ],
+  intuition:[
+    {name:'Full Moon Third Eye Ritual',timing:'Full Moon',ingredients:['Amethyst or labradorite','Blue or purple candle','Mugwort incense or tea','Blindfold (optional)'],instructions:'Brew mugwort tea (use carefully — avoid in pregnancy). Light your candle. Lie back with your crystal resting on your third eye (between your brows). Cover your eyes or use a blindfold. Let your mind go still. If visions or knowing comes — note it. This is your natural psychic perception opening. Practice at every full moon.',warning:'Mugwort is a powerful vision herb. Use moderation — small amounts in tea are generally safe for healthy adults.'},
+    {name:'Scrying Bowl Ritual',timing:'Night · Any Moon phase',ingredients:['Dark bowl','Water','Black ink (optional)','Candle'],instructions:'Fill a dark bowl with still water. Add a drop of black ink if desired. Set the candle behind you so its light doesn\'t reflect in the bowl. Gaze at the surface of the water without focusing your eyes. Let your gaze soften. Images, words, or feelings will arise in your mind — these are your visions. Record everything immediately after.',warning:'Scrying is a right-brain skill that develops with practice — don\'t give up if nothing comes immediately.'},
+  ],
+  manifestation:[
+    {name:'New Moon Intention Setting',timing:'New Moon — the most powerful time',ingredients:['Black or white candle','Paper','Pen','Crystal aligned to your goal'],instructions:'On the night of the new moon, write your intention in present tense as if already true: "I am grateful that I now have..." Write with full belief and emotional charge. Fold the paper toward you three times. Light your candle and hold the paper over it briefly (don\'t burn it yet). Place the paper under your pillow for the first night. Keep it on your altar until the full moon, then burn it to release it to the universe.',warning:'Write only what you truly want — the universe takes new moon intentions seriously.'},
+    {name:'Sigil Magic Manifestation',timing:'Any time',ingredients:['Paper','Pen','Purple candle (optional)'],instructions:'Write your desire as a statement. Remove all vowels and duplicate letters. Rearrange the remaining letters into an abstract symbol — your sigil. Forget the original meaning. Light your candle. Focus on the sigil with intense desire, letting the feeling peak. Then completely forget about it. Burn the sigil. The "lust for result" is what blocks manifestation — forgetting the sigil releases it to work.',warning:'The hardest part is forgetting. Do something distracting immediately after the ritual.'},
+  ],
+};
+
+const HERBS = [
+  {name:'Mugwort',emoji:'🌿',latin:'Artemisia vulgaris',element:'Earth/Water',planet:'Moon/Venus',magic:['Dreams','Psychic vision','Astral travel','Protection during travel'],medicinal:'Mild emmenagogue, digestive, sleep herb. Burn or drink as mild tea.',caution:'AVOID in pregnancy. Can cause heavy menstruation.',correspondences:['Silver','Moon','The Crone','Hecate'],harvest:'Midsummer to Lammas, just before flowering'},
+  {name:'Lavender',emoji:'💜',latin:'Lavandula angustifolia',element:'Air',planet:'Mercury/Venus',magic:['Calm','Love','Purification','Sleep','Clarity'],medicinal:'Stress relief, headaches, sleep aid, antiseptic.',caution:'Generally safe. Avoid concentrated oil on sensitive skin.',correspondences:['Purple','Air','Clarity','Healing'],harvest:'When flowers are 50% open — morning harvest'},
+  {name:'Rosemary',emoji:'🌱',latin:'Rosmarinus officinalis',element:'Fire',planet:'Sun/Mercury',magic:['Memory','Protection','Purification','Love','Remembrance of ancestors'],medicinal:'Circulation, memory, hair growth, antimicrobial.',caution:'Avoid in large doses during pregnancy.',correspondences:['Gold','Sun','Memory','Clarity'],harvest:'Year-round. Best before flowering.'},
+  {name:'Chamomile',emoji:'🌼',latin:'Matricaria chamomilla',element:'Water',planet:'Sun',magic:['Peace','Sleep','Money attraction','Sun magic','Uncrossing'],medicinal:'Digestive, anti-inflammatory, sleep, anxiety relief.',caution:'Allergy possible in ragweed-sensitive individuals.',correspondences:['Yellow','Gold','Calm','Abundance'],harvest:'When flowers fully open, late summer'},
+  {name:'Sage',emoji:'🌿',latin:'Salvia officinalis',element:'Air/Earth',planet:'Jupiter',magic:['Wisdom','Purification','Cleansing','Protection','Longevity'],medicinal:'Antibacterial, menopausal symptoms, cognitive function.',caution:'Avoid in epilepsy. Moderation in pregnancy.',correspondences:['Purple','White','Wisdom','Ancestors'],harvest:'Before flowering in spring'},
+  {name:'Wormwood',emoji:'🌿',latin:'Artemisia absinthium',element:'Fire',planet:'Mars/Saturn',magic:['Psychic vision','Calling spirits','Hex breaking','Banishing'],medicinal:'Traditional digestive bitter. Used in vermouth and absinthe.',caution:'TOXIC in large doses. Do not consume essential oil. Use in incense only for most workings.',correspondences:['Black','Saturn','The Underworld','Banishing'],harvest:'Midsummer, before flowering'},
+  {name:'St. John\'s Wort',emoji:'🌻',latin:'Hypericum perforatum',element:'Fire',planet:'Sun',magic:['Protection from evil','Midsummer magic','Banishing negativity','Solar rituals'],medicinal:'Mild antidepressant, nerve pain, wound healing.',caution:'Interacts with many medications (SSRIs, birth control, blood thinners). Photosensitivity possible.',correspondences:['Gold','Sun','Litha','Solar power'],harvest:'Exactly on the Summer Solstice for maximum potency'},
+  {name:'Valerian',emoji:'🌸',latin:'Valeriana officinalis',element:'Water',planet:'Venus/Mercury',magic:['Sleep','Cats (they love it)','Love','Harmony in the home'],medicinal:'Sleep aid, anxiety, tension headaches.',caution:'Drowsiness. Avoid with alcohol and sedatives. Do not drive after use.',correspondences:['Pink','Water','Sleep','Peace'],harvest:'Autumn root harvest'},
+  {name:'Nettle',emoji:'🌿',latin:'Urtica dioica',element:'Fire',planet:'Mars',magic:['Protection','Courage','Dispelling darkness','Hex breaking'],medicinal:'Iron-rich, anti-inflammatory, hair and skin health, allergy relief.',caution:'Handle with gloves — stings! Cooking or drying neutralizes the sting.',correspondences:['Green','Mars','Beltane','Protection'],harvest:'Spring shoots before flowering'},
+  {name:'Elder',emoji:'🌸',latin:'Sambucus nigra',element:'Water',planet:'Venus/Saturn',magic:['Protection','Fairy magic','Healing','Transformation','Death & rebirth'],medicinal:'Elder flower: cold and flu, anti-inflammatory. Elder berry: immune support.',caution:'Raw berries are toxic. Leaves, bark, and roots toxic. Only cook ripe berries.',correspondences:['White','Black','The Otherworld','Fairy magic'],harvest:'Flowers in June, berries in August-September'},
+  {name:'Yarrow',emoji:'🌼',latin:'Achillea millefolium',element:'Water',planet:'Venus',magic:['Love divination','Courage','Protection in battle','Psychic opening'],medicinal:'Wound healing (named for Achilles), fever, menstrual cramps.',caution:'Related to ragweed — allergy possible. Avoid in pregnancy.',correspondences:['White','Pink','Courage','Love'],harvest:'When fully in flower, midsummer'},
+  {name:'Mandrake',emoji:'🌱',latin:'Mandragora officinarum',element:'Fire',planet:'Mercury/Saturn',magic:['Binding','Poppet magic','Fertility','Wealth','Protection'],medicinal:'TOXIC. Historical use as anesthetic — NOT for modern use.',caution:'EXTREMELY TOXIC. All parts dangerous. Handle roots with reverence. Used in magical work, NOT consumed.',correspondences:['Black','Saturn','Power','Binding'],harvest:'Autumn — traditionally harvested at dawn with ceremony'},
+];
+
+const CRYSTALS = [
+  {name:'Amethyst',emoji:'💜',element:'Water/Air',planet:'Jupiter/Neptune',chakra:'Third Eye & Crown',magic:['Psychic development','Protection','Dreams','Sobriety','Spiritual connection'],healing:'Stress relief, insomnia, headaches, psychic protection.',cleansing:'Moonlight, sound, selenite. Avoid sunlight — fades over time.',programming:'Hold during meditation. Set intention under full moon.',hardness:'7',system:'Trigonal',color:'Purple to violet',affirmation:'I trust my intuition and spiritual guidance.'},
+  {name:'Rose Quartz',emoji:'💗',element:'Water',planet:'Venus',chakra:'Heart',magic:['Unconditional love','Self-love','Emotional healing','Attracting love','Peace'],healing:'Heart grief, self-worth, relationship healing.',cleansing:'Moonlight, sound, running water.',programming:'Breathe love into it while holding it to your heart.',hardness:'7',system:'Trigonal',color:'Pale to deep pink',affirmation:'I am worthy of deep and lasting love.'},
+  {name:'Black Tourmaline',emoji:'⚫',element:'Earth',planet:'Saturn',chakra:'Root',magic:['Protection','Grounding','EMF shielding','Banishing negative energy'],healing:'Anxiety, protection from psychic attack, grounding.',cleansing:'Black salt, selenite, running water.',programming:'Set protection intention while grounding through feet.',hardness:'7-7.5',system:'Trigonal',color:'Black',affirmation:'I am protected, grounded, and safe.'},
+  {name:'Citrine',emoji:'🟡',element:'Fire',planet:'Sun/Mercury',chakra:'Solar Plexus',magic:['Abundance','Manifestation','Joy','Confidence','Creativity'],healing:'Self-esteem, depression, digestive issues, creativity blocks.',cleansing:'Rarely needs cleansing — self-cleansing stone. Use sound or smoke.',programming:'Set abundance intention under sunrise.',hardness:'7',system:'Trigonal',color:'Yellow to amber',affirmation:'Abundance flows to me easily and joyfully.'},
+  {name:'Labradorite',emoji:'🔵',element:'Water',planet:'Uranus/Moon',chakra:'Third Eye',magic:['Transformation','Psychic protection','Aura shielding','Magic enhancement'],healing:'Psychic overwhelm protection, transformation support.',cleansing:'Moonlight preferred. Avoid prolonged water.',programming:'Set transformation intention at a threshold or doorway.',hardness:'6-6.5',system:'Triclinic',color:'Grey with iridescent flash',affirmation:'I transform with grace and walk between worlds.'},
+  {name:'Selenite',emoji:'🤍',element:'Spirit/Water',planet:'Moon',chakra:'Crown',magic:['Purification','Angel communication','Space clearing','Charging other crystals'],healing:'Mental clarity, angelic connection, space clearing.',cleansing:'Never in water — dissolves! Use sound or moonlight.',programming:'Simply hold with clear intention — selenite is self-cleansing.',hardness:'2',system:'Monoclinic',color:'White to clear',affirmation:'I am pure light and connected to divine guidance.'},
+  {name:'Obsidian',emoji:'⚫',element:'Fire/Earth',planet:'Saturn/Pluto',chakra:'Root',magic:['Shadow work','Truth','Protection','Scrying','Grounding'],healing:'Facing shadow self, past trauma, grounding.',cleansing:'Running water, black salt, moonlight.',programming:'Set shadow work intention on new moon.',hardness:'5-5.5',system:'Amorphous (volcanic glass)',color:'Black, sometimes with sheen',affirmation:'I face my shadow with courage and emerge transformed.'},
+  {name:'Moonstone',emoji:'🌙',element:'Water',planet:'Moon',chakra:'Third Eye/Crown',magic:['Intuition','Feminine energy','Cycles','Fertility','Travel magic'],healing:'PMS, hormonal balance, emotional cycles, psychic development.',cleansing:'Moonlight — especially full moon. Sound.',programming:'Charge on windowsill during full moon.',hardness:'6-6.5',system:'Monoclinic',color:'White, peach, grey with adularescence',affirmation:'I flow with the cycles of nature and trust my inner knowing.'},
+  {name:'Lapis Lazuli',emoji:'💙',element:'Air/Water',planet:'Venus/Jupiter',chakra:'Third Eye & Throat',magic:['Truth','Wisdom','Royalty','Psychic power','Communication with guides'],healing:'Self-expression, truthfulness, intellectual clarity.',cleansing:'Moonlight, sound. Avoid prolonged water.',programming:'Set truth and wisdom intention at night under stars.',hardness:'5-6',system:'Cubic',color:'Deep blue with gold pyrite flecks',affirmation:'I speak my truth and trust divine wisdom.'},
+  {name:'Malachite',emoji:'💚',element:'Earth',planet:'Venus',chakra:'Heart',magic:['Transformation','Protection during travel','Absorbs negativity','Heart healing'],healing:'Heart healing, transformation, absorbs environmental pollutants.',cleansing:'NEVER water — toxic! Sound or selenite only.',programming:'Set heart healing intention on new moon.',hardness:'3.5-4',system:'Monoclinic',color:'Green with banding patterns',affirmation:'My heart heals and opens to new transformation.'},
+  {name:'Carnelian',emoji:'🟠',element:'Fire',planet:'Sun/Mars',chakra:'Sacral',magic:['Courage','Creativity','Motivation','Protection from the evil eye','Passion'],healing:'Creativity blocks, motivation, sexual energy, confidence.',cleansing:'Sunlight safe. Running water. Sound.',programming:'Hold during creative work or before courageous action.',hardness:'7',system:'Trigonal',color:'Orange to red-orange',affirmation:'I act with courage and create with passion.'},
+  {name:'Clear Quartz',emoji:'🔮',element:'Spirit (all elements)',planet:'Sun/Moon (amplifier)',chakra:'All chakras',magic:['Amplification','Programmable for any intention','Clarity','Channeling'],healing:'Master healer — amplifies all healing intentions.',cleansing:'Sunlight, moonlight, running water, sound, earth.',programming:'Most programmable crystal — charge with any clear intention.',hardness:'7',system:'Trigonal',color:'Clear to white',affirmation:'I am clear, focused, and amplified in all I intend.'},
+];
+
+let currentTab = 'spells';
+let selectedSpellCat = 'love';
+
+function setTab(tab, btn) {
+  currentTab = tab;
+  document.querySelectorAll('#shadows-tabs .toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  ['spells','herbs','crystals','dreams','rituals'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t === tab ? '' : 'none';
+  });
+  if (tab === 'spells') renderSpells(selectedSpellCat);
+  else if (tab === 'herbs') renderHerbs();
+  else if (tab === 'crystals') renderCrystals();
+}
+
+function renderSpellCategoryBtns(active) {
+  return SPELL_CATEGORIES.map(c => `<div class="spell-category-btn${c.id===active?' active-cat':''}" onclick="selectSpellCat('${c.id}',event)" style="${c.id===active?'border-color:'+c.color+';background:'+c.color+'22':''}">${c.icon}<br><span style="font-size:11px">${c.name}</span></div>`).join('');
+}
+
+function selectSpellCat(id) {
+  selectedSpellCat = id;
+  renderSpells(id);
+}
+
+function renderSpells(cat) {
+  const spells = SPELLS[cat] || [];
+  document.getElementById('tab-spells').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">${renderSpellCategoryBtns(cat)}</div>
+    ${spells.map((s,i) => `
+    <div class="card" style="cursor:pointer" onclick="showSpell('${cat}',${i})">
+      <div style="font-family:'Cinzel Decorative',serif;font-size:13px;color:var(--silver);margin-bottom:4px">${s.name}</div>
+      <div style="font-size:12px;color:var(--gold);margin-bottom:6px">⏰ ${s.timing}</div>
+      <div style="font-size:13px;color:var(--dust)">${s.instructions.substring(0,100)}…</div>
+      <div style="font-size:11px;color:var(--teal);margin-top:8px">Tap to read full spell →</div>
+    </div>`).join('')}`;
+}
+
+function showSpell(cat, idx) {
+  const s = SPELLS[cat][idx];
+  openModal(`
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">${s.name}</div>
+    <div class="modal-sub">⏰ ${s.timing}</div>
+    <div class="modal-section"><h4>🧪 You Will Need</h4>${s.ingredients.map(i=>`<div style="padding:4px 0;font-size:14px;color:var(--moon)">• ${i}</div>`).join('')}</div>
+    <div class="modal-section"><h4>📜 Instructions</h4><p style="font-size:15px;color:var(--moon);line-height:1.8">${s.instructions}</p></div>
+    ${s.warning?`<div style="background:rgba(212,168,67,.1);border:1px solid rgba(212,168,67,.2);border-radius:10px;padding:10px;font-size:13px;color:var(--gold)">⚠️ ${s.warning}</div>`:''}
+    <button class="btn btn-teal" onclick="copySpell('${cat}',${idx})" style="margin-top:14px">📋 Copy to Book of Shadows</button>
+  `);
+}
+
+function copySpell(cat, idx) {
+  const s = SPELLS[cat][idx];
+  copyText(`✦ ${s.name}\nTiming: ${s.timing}\n\nIngredients:\n${s.ingredients.map(i=>'• '+i).join('\n')}\n\nInstructions:\n${s.instructions}\n\n${s.warning?'Note: '+s.warning+'\n\n':''}— Cosmic Whispers`);
+}
+
+function renderHerbs() {
+  document.getElementById('tab-herbs').innerHTML = HERBS.map((h,i) => `
+    <div class="herb-card" onclick="showHerb(${i})">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+        <span style="font-size:24px">${h.emoji}</span>
+        <div>
+          <div style="font-family:'Cinzel Decorative',serif;font-size:13px;color:var(--silver)">${h.name}</div>
+          <div style="font-size:11px;color:var(--dust);font-style:italic">${h.latin}</div>
+        </div>
+        <div style="margin-left:auto;font-size:12px;color:var(--teal)">🌿 ${h.planet}</div>
+      </div>
+      <div class="tag-row">${h.magic.slice(0,3).map(m=>`<span class="tag">${m}</span>`).join('')}</div>
+    </div>`).join('');
+}
+
+function showHerb(i) {
+  const h = HERBS[i];
+  openModal(`
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div style="font-size:36px;margin-bottom:6px">${h.emoji}</div>
+    <div class="modal-title">${h.name}</div>
+    <div style="font-style:italic;color:var(--dust);margin-bottom:14px">${h.latin}</div>
+    <div class="modal-section"><h4>🌙 Magical Uses</h4><div class="tag-row">${h.magic.map(m=>`<span class="tag">${m}</span>`).join('')}</div></div>
+    <div class="modal-section"><h4>🌍 Element & Planet</h4><p>${h.element} · ${h.planet}</p></div>
+    <div class="modal-section"><h4>💊 Medicinal Properties</h4><p style="color:var(--sage)">${h.medicinal}</p></div>
+    <div style="background:rgba(196,98,26,.1);border:1px solid rgba(196,98,26,.25);border-radius:10px;padding:10px;margin-bottom:12px;font-size:13px;color:var(--ember)">⚠️ ${h.caution}</div>
+    <div class="modal-section"><h4>🔮 Correspondences</h4><div class="tag-row">${(h.correspondences||[]).map(c=>`<span class="tag">${c}</span>`).join('')}</div></div>
+    <div class="modal-section"><h4>🌱 Harvest Time</h4><p>${h.harvest}</p></div>
+    <button class="btn btn-teal" onclick="copyHerb(${i})" style="margin-top:14px">📋 Copy to Book of Shadows</button>
+  `);
+}
+
+function copyHerb(i) {
+  const h = HERBS[i];
+  copyText(`✦ ${h.name} (${h.latin})\nElement: ${h.element} · Planet: ${h.planet}\n\nMagical uses: ${h.magic.join(', ')}\n\nMedicinal: ${h.medicinal}\n\nCaution: ${h.caution}\n\nHarvest: ${h.harvest}\n\n— Cosmic Whispers`);
+}
+
+function renderCrystals() {
+  document.getElementById('tab-crystals').innerHTML = CRYSTALS.map((c,i) => `
+    <div class="crystal-card" onclick="showCrystal(${i})">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+        <span style="font-size:24px">${c.emoji}</span>
+        <div>
+          <div style="font-family:'Cinzel Decorative',serif;font-size:13px;color:var(--silver)">${c.name}</div>
+          <div style="font-size:11px;color:var(--dust)">${c.planet} · ${c.chakra}</div>
+        </div>
+      </div>
+      <div class="tag-row">${c.magic.slice(0,3).map(m=>`<span class="tag">${m}</span>`).join('')}</div>
+    </div>`).join('');
+}
+
+function showCrystal(i) {
+  const c = CRYSTALS[i];
+  openModal(`
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div style="font-size:36px;margin-bottom:6px">${c.emoji}</div>
+    <div class="modal-title">${c.name}</div>
+    <div class="modal-sub">${c.element} · ${c.planet}</div>
+    <div class="modal-section"><h4>✨ Magical Properties</h4><div class="tag-row">${c.magic.map(m=>`<span class="tag">${m}</span>`).join('')}</div></div>
+    <div class="modal-section"><h4>💊 Healing Uses</h4><p style="color:var(--sage)">${c.healing}</p></div>
+    <div class="modal-section"><h4>🔮 Chakra</h4><p>${c.chakra}</p></div>
+    <div class="modal-section"><h4>🌙 How to Cleanse</h4><p>${c.cleansing}</p></div>
+    <div class="modal-section"><h4>⭐ How to Program</h4><p>${c.programming}</p></div>
+    <div class="modal-section"><h4>🪨 Mineral Data</h4>
+      <div class="data-row"><span class="data-label">Hardness (Mohs)</span><span class="data-val">${c.hardness}</span></div>
+      <div class="data-row"><span class="data-label">Crystal System</span><span class="data-val">${c.system}</span></div>
+      <div class="data-row"><span class="data-label">Color Range</span><span class="data-val">${c.color}</span></div>
+    </div>
+    <div style="background:rgba(196,168,232,.08);border-radius:10px;padding:12px;font-style:italic;font-size:14px;color:var(--silver);text-align:center">✨ "${c.affirmation}"</div>
+    <button class="btn btn-teal" onclick="copyCrystal(${i})" style="margin-top:14px">📋 Copy to Book of Shadows</button>
+  `);
+}
+
+function copyCrystal(i) {
+  const c = CRYSTALS[i];
+  copyText(`✦ ${c.name}\nElement: ${c.element} · Planet: ${c.planet} · Chakra: ${c.chakra}\n\nMagical uses: ${c.magic.join(', ')}\n\nHealing: ${c.healing}\n\nCleansing: ${c.cleansing}\nProgramming: ${c.programming}\n\nAffirmation: "${c.affirmation}"\n\n— Cosmic Whispers`);
+}
+
+function init() {
+  const cache = loadCache(); let signs, moon;
+  if (!cacheStale(cache)) { signs = cache.d.signs; moon = cache.d.moon; }
+  else { const now = new Date(); signs = computeSigns(now); moon = getMoonPhase(now); saveCache({signs,moon}); }
+  renderHUD(signs, moon);
+
+  // Init dreams and rituals tabs
+  document.getElementById('tab-dreams').innerHTML = `<div class="card"><div class="card-title">🌙 Dream Journal</div><div style="font-size:15px;color:var(--moon);line-height:1.8;margin-bottom:14px">Record your dreams here and track patterns across lunar cycles. Full moons, eclipses, and planetary transits often bring prophetic or meaningful dreams.</div><a href="journal.html" class="btn btn-teal" style="text-align:center;display:block;text-decoration:none;margin-bottom:10px">📜 Open Your Journal →</a><div style="font-size:13px;color:var(--dust)">Tip: Keep a journal by your bed. Record dreams immediately upon waking, before the conscious mind interferes. Look for repeating symbols — these are your personal dream language.</div></div>`;
+  document.getElementById('tab-rituals').innerHTML = `<div class="card"><div class="card-title">✦ Rituals & Tracking</div><div style="font-size:15px;color:var(--moon);line-height:1.8;margin-bottom:14px">Track your ritual work across the lunar cycle. Note which spells you cast and when, so you can observe the patterns of what works for you personally.</div><a href="journal.html" class="btn btn-teal" style="text-align:center;display:block;text-decoration:none;margin-bottom:10px">📜 Log a Ritual in Your Journal →</a></div>`;
+
+  renderSpells('love');
+}
+
+// Init the hash tab
+const tabHash = window.location.hash.replace('#','');
+if (tabHash === 'spells') currentTab = 'spells';
+
+function waitForAstronomy(cb,tries=0){if(typeof Astronomy!=="undefined"){cb();return;}if(tries>20){cb();return;}setTimeout(()=>waitForAstronomy(cb,tries+1),500);}
+waitForAstronomy(()=>init());
+</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");</script>
+</body>
+</html>
